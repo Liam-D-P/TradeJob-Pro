@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { DollarSign, Briefcase, Package, Activity, PlusCircle, MinusCircle, Trash2, Save, Play, Square, Calendar, LayoutDashboard, Calculator, ClipboardList, X, ChevronDown, ChevronUp, FileDown, Eye, TrendingUp, User, LogOut, Settings } from 'lucide-react'
+import { DollarSign, Briefcase, Package, Activity, PlusCircle, MinusCircle, Trash2, Save, Play, Square, Calendar, LayoutDashboard, Calculator, ClipboardList, X, ChevronDown, FileDown, Eye, TrendingUp, User, LogOut, Settings } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format } from "date-fns"
@@ -42,7 +42,7 @@ const NumberTicker = ({ value }: { value: number }) => {
     }, duration / steps)
 
     return () => clearInterval(timer)
-  }, [value])
+  }, [value, displayValue])
 
   return <span>{displayValue}</span>
 }
@@ -114,6 +114,16 @@ type DashboardItem = {
 }
 
 export default function Dashboard() {
+  console.log('Dashboard component rendered');
+
+  useEffect(() => {
+    console.log('Dashboard component mounted');
+  }, []);
+
+  return <DashboardComponent />;
+}
+
+function DashboardComponent() {
   const [activeTab, setActiveTab] = useState('DASH')
   const [materials, setMaterials] = useState<Material[]>([])
   const [newMaterial, setNewMaterial] = useState<Omit<Material, 'id' | 'quantity'>>({ name: '', cost: 0, unit: '' })
@@ -124,37 +134,29 @@ export default function Dashboard() {
   const [materialCosts, setMaterialCosts] = useState(12222)
   const [activeProjects, setActiveProjects] = useState<Job[]>([])
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
-  const [isEditMode, setIsEditMode] = useState(false)
   const { toast } = useToast()
 
-  const [user, setUser] = useState({
+  const user = {
     name: 'John Doe',
     email: 'john.doe@example.com',
     avatar: '/placeholder.svg?height=100&width=100',
-  })
+  }
 
-  const [dashboardItems, setDashboardItems] = useState<DashboardItem[]>([
+  const dashboardItems: DashboardItem[] = [
     { id: 'profit', title: 'Profit', component: null },
     { id: 'revenue', title: 'Revenue', component: null },
     { id: 'materialCosts', title: 'Material Costs', component: null },
     { id: 'upcomingJobs', title: 'Upcoming Jobs', component: null },
     { id: 'activeProjects', title: 'Active Projects', component: null },
-  ])
+  ]
 
-  const [visibleItems, setVisibleItems] = useState<string[]>(dashboardItems.map(item => item.id))
+  const [visibleItems, setVisibleItems] = useState<string[]>([])
 
   useEffect(() => {
-    // Load visible items from localStorage on the client side
+    // Move localStorage access to useEffect
     const savedVisibleItems = localStorage.getItem('visibleDashboardItems')
-    if (savedVisibleItems) {
-      setVisibleItems(JSON.parse(savedVisibleItems))
-    }
+    setVisibleItems(savedVisibleItems ? JSON.parse(savedVisibleItems) : dashboardItems.map(item => item.id))
   }, [])
-
-  useEffect(() => {
-    // Save visible items to localStorage whenever they change
-    localStorage.setItem('visibleDashboardItems', JSON.stringify(visibleItems))
-  }, [visibleItems])
 
   useEffect(() => {
     setMaterials([
@@ -165,9 +167,23 @@ export default function Dashboard() {
     ])
   }, [])
 
+  const calculatePrice = useCallback(() => {
+    const price = materials.reduce((total, material) => {
+      return total + (material.cost * material.quantity)
+    }, 0)
+    setTotalPrice(price)
+  }, [materials])
+
   useEffect(() => {
     calculatePrice()
-  }, [materials])
+  }, [calculatePrice])
+
+  useEffect(() => {
+    // Only save to localStorage on the client side
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('visibleDashboardItems', JSON.stringify(visibleItems))
+    }
+  }, [visibleItems])
 
   const addMaterial = () => {
     if (newMaterial.name && newMaterial.cost > 0) {
@@ -209,13 +225,6 @@ export default function Dashboard() {
         variant: "destructive",
       })
     }
-  }
-
-  const calculatePrice = () => {
-    const price = materials.reduce((total, material) => {
-      return total + (material.cost * material.quantity)
-    }, 0)
-    setTotalPrice(price)
   }
 
   const saveJob = () => {
@@ -309,7 +318,7 @@ export default function Dashboard() {
     
     const tableData = job.materials.map(m => [m.name, m.quantity, m.unit, `$${m.cost.toFixed(2)}`, `$${(m.quantity * m.cost).toFixed(2)}`])
     
-    // @ts-ignore
+    // @ts-expect-error: jsPDF types are not fully compatible with the autoTable plugin
     doc.autoTable({
       head: [['Material', 'Quantity', 'Unit', 'Cost per Unit', 'Total']],
       body: tableData,

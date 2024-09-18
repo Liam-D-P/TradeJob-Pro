@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,11 +19,6 @@ export default function AuthPage() {
     console.log("onSubmit function called", action);
     event.preventDefault()
     setIsLoading(true)
-
-    const form = event.target as HTMLFormElement
-    const formData = new FormData(form)
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
 
     // Simulate API call with a moderate delay
     await new Promise(resolve => setTimeout(resolve, 500)) // Increased to 500ms

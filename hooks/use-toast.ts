@@ -3,15 +3,15 @@
 // Inspired by react-hot-toast library
 import * as React from "react"
 
-import type {
-  ToastActionElement,
-  ToastProps,
-} from "@/components/ui/toast"
+import { ToastAction } from "@/components/ui/toast"
+
+// Define ToastActionElement here
+type ToastActionElement = React.ReactElement<typeof ToastAction>
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
 
-type ToasterToast = ToastProps & {
+type ToasterToast = {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
@@ -157,10 +157,6 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss()
-      },
     },
   })
 
@@ -192,3 +188,4 @@ function useToast() {
 }
 
 export { useToast, toast }
+export type { ToastActionElement }
