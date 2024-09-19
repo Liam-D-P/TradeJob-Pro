@@ -1,13 +1,13 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { DollarSign, Briefcase, Package, Activity, PlusCircle, MinusCircle, Trash2, Save, Play, Square, Calendar, LayoutDashboard, Calculator, ClipboardList, X, ChevronDown, FileDown, Eye, TrendingUp, User, LogOut, Settings } from 'lucide-react'
+import { DollarSign, Briefcase, Package, Activity, PlusCircle, MinusCircle, Trash2, Save, Play, Square, Calendar, LayoutDashboard, Calculator, ClipboardList, X, ChevronDown, FileDown, Eye, TrendingUp, User, LogOut, Settings, PoundSterling } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format } from "date-fns"
@@ -19,12 +19,13 @@ import { jsPDF } from 'jspdf'
 import 'jspdf-autotable'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useRouter } from 'next/navigation'
 
 const NumberTicker = ({ value }: { value: number }) => {
   const [displayValue, setDisplayValue] = useState(0)
 
   useEffect(() => {
-    const duration = 1000
+    const duration = 500
     const steps = 60
     const stepValue = (value - displayValue) / steps
     let currentStep = 0
@@ -124,6 +125,7 @@ export default function Dashboard() {
 }
 
 function DashboardComponent() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('DASH')
   const [materials, setMaterials] = useState<Material[]>([])
   const [newMaterial, setNewMaterial] = useState<Omit<Material, 'id' | 'quantity'>>({ name: '', cost: 0, unit: '' })
@@ -142,21 +144,20 @@ function DashboardComponent() {
     avatar: '/placeholder.svg?height=100&width=100',
   }
 
-  const dashboardItems: DashboardItem[] = [
+  const dashboardItems = useMemo(() => [
     { id: 'profit', title: 'Profit', component: null },
     { id: 'revenue', title: 'Revenue', component: null },
     { id: 'materialCosts', title: 'Material Costs', component: null },
     { id: 'upcomingJobs', title: 'Upcoming Jobs', component: null },
     { id: 'activeProjects', title: 'Active Projects', component: null },
-  ]
+  ], [])
 
   const [visibleItems, setVisibleItems] = useState<string[]>([])
 
   useEffect(() => {
-    // Move localStorage access to useEffect
-    const savedVisibleItems = localStorage.getItem('visibleDashboardItems')
-    setVisibleItems(savedVisibleItems ? JSON.parse(savedVisibleItems) : dashboardItems.map(item => item.id))
-  }, [])
+    // Set all dashboard items to be visible by default
+    setVisibleItems(dashboardItems.map(item => item.id))
+  }, [dashboardItems])
 
   useEffect(() => {
     setMaterials([
@@ -314,9 +315,9 @@ function DashboardComponent() {
   const generatePDF = (job: Job) => {
     const doc = new jsPDF()
     doc.text(`Job Breakdown: ${job.name}`, 20, 20)
-    doc.text(`Total Cost: $${job.totalPrice.toFixed(2)}`, 20, 30)
+    doc.text(`Total Cost: £${job.totalPrice.toFixed(2)}`, 20, 30)
     
-    const tableData = job.materials.map(m => [m.name, m.quantity, m.unit, `$${m.cost.toFixed(2)}`, `$${(m.quantity * m.cost).toFixed(2)}`])
+    const tableData = job.materials.map(m => [m.name, m.quantity, m.unit, `£${m.cost.toFixed(2)}`, `£${(m.quantity * m.cost).toFixed(2)}`])
     
     // @ts-expect-error: jsPDF types are not fully compatible with the autoTable plugin
     doc.autoTable({
@@ -334,7 +335,11 @@ function DashboardComponent() {
   }
 
   const handleLogout = () => {
-    // Implement logout logic here
+    // Implement logout logic here (e.g., clear tokens, reset state)
+    
+    // Redirect to the landing page
+    router.push('/')
+    
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
@@ -507,7 +512,7 @@ function DashboardComponent() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 p-8 overflow-auto bg-white">
         {activeTab === 'DASH' && (
           <>
             <div className="flex justify-between items-center mb-4">
@@ -609,9 +614,9 @@ function DashboardComponent() {
                   {materials.map((material) => (
                     <TableRow key={material.id}>
                       <TableCell>{material.name}</TableCell>
-                      <TableCell>${material.cost.toFixed(2)} per {material.unit}</TableCell>
+                      <TableCell>£{material.cost.toFixed(2)} per {material.unit}</TableCell>
                       <TableCell>{material.quantity}</TableCell>
-                      <TableCell>${(material.cost * material.quantity).toFixed(2)}</TableCell>
+                      <TableCell>£{(material.cost * material.quantity).toFixed(2)}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button variant="outline" size="icon" onClick={() => updateQuantity(material.id, -1)}>
@@ -620,7 +625,7 @@ function DashboardComponent() {
                           <Button variant="outline" size="icon" onClick={() => updateQuantity(material.id, 1)}>
                             <PlusCircle className="h-4 w-4" />
                           </Button>
-                          <Button variant="destructive" size="icon" onClick={() => deleteMaterial(material.id)}>
+                          <Button className="bg-red-500 text-white hover:bg-red-600" size="icon" onClick={() => deleteMaterial(material.id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -633,7 +638,7 @@ function DashboardComponent() {
               <div className="mt-6 space-y-4">
                 <Collapsible>
                   <CollapsibleTrigger className="flex items-center">
-                    <div className="text-2xl font-bold">Total Price: ${totalPrice.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">Total Price: £{totalPrice.toFixed(2)}</div>
                     <ChevronDown className="h-4 w-4 ml-2" />
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -650,7 +655,7 @@ function DashboardComponent() {
                           <TableRow key={material.id}>
                             <TableCell>{material.name}</TableCell>
                             <TableCell>{material.quantity} {material.unit}</TableCell>
-                            <TableCell>${(material.cost * material.quantity).toFixed(2)}</TableCell>
+                            <TableCell>£{(material.cost * material.quantity).toFixed(2)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -698,9 +703,9 @@ function DashboardComponent() {
                   {savedJobs.map((job) => (
                     <TableRow key={job.id}>
                       <TableCell>{job.name}</TableCell>
-                      <TableCell>${job.totalPrice.toFixed(2)}</TableCell>
-                      <TableCell>${job.revenue?.toFixed(2) || '0.00'}</TableCell>
-                      <TableCell>${job.profit?.toFixed(2) || '0.00'}</TableCell>
+                      <TableCell>£{job.totalPrice.toFixed(2)}</TableCell>
+                      <TableCell>£{job.revenue?.toFixed(2) || '0.00'}</TableCell>
+                      <TableCell>£{job.profit?.toFixed(2) || '0.00'}</TableCell>
                       <TableCell>
                         <StatusBadge status={job.status} />
                       </TableCell>
@@ -736,7 +741,7 @@ function DashboardComponent() {
                           )}
                           {job.status === 'completed' && (
                             <Button variant="outline" size="sm" onClick={() => setSelectedJob(job)}>
-                              <DollarSign className="mr-2 h-4 w-4" /> Report Revenue
+                              <PoundSterling className="mr-2 h-4 w-4" /> Report Revenue
                             </Button>
                           )}
                           <Dialog>
@@ -762,7 +767,7 @@ function DashboardComponent() {
                                     <TableRow key={material.id}>
                                       <TableCell>{material.name}</TableCell>
                                       <TableCell>{material.quantity} {material.unit}</TableCell>
-                                      <TableCell>${(material.cost * material.quantity).toFixed(2)}</TableCell>
+                                      <TableCell>£{(material.cost * material.quantity).toFixed(2)}</TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
@@ -806,7 +811,7 @@ function DashboardComponent() {
                     </Button>
                   </div>
                   {selectedJob.revenue && (
-                    <p className="mt-2">Estimated Profit: ${(selectedJob.revenue - selectedJob.totalPrice).toFixed(2)}</p>
+                    <p className="mt-2">Estimated Profit: £{(selectedJob.revenue - selectedJob.totalPrice).toFixed(2)}</p>
                   )}
                 </div>
               )}
@@ -836,7 +841,7 @@ function DashboardComponent() {
                   <Button variant="outline" onClick={() => setActiveTab('DASH')}>
                     Back to Dashboard
                   </Button>
-                  <Button variant="destructive" onClick={handleLogout}>
+                  <Button className="bg-red-500 text-white hover:bg-red-600" onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" /> Log Out
                   </Button>
                 </div>

@@ -49,7 +49,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Welcome</CardTitle>
@@ -81,11 +81,12 @@ export default function AuthPage() {
                     id="signin-email"
                     name="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder="Your email address"
                     autoCapitalize="none"
                     autoComplete="email"
                     autoCorrect="off"
                     disabled={isLoading}
+                    className="placeholder:text-gray-400 placeholder:opacity-50" // Add this line
                   />
                 </div>
                 <div className="grid gap-2">
@@ -94,10 +95,12 @@ export default function AuthPage() {
                     id="signin-password"
                     name="password"
                     type="password"
+                    placeholder="Your password"
                     disabled={isLoading}
+                    className="placeholder:text-gray-400 placeholder:opacity-50"
                   />
                 </div>
-                <Button className="w-full mt-4" type="submit" disabled={isLoading}>
+                <Button className="w-full mt-4 dark:border dark:border-white" type="submit" disabled={isLoading}>
                   {isLoading && (
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -113,11 +116,12 @@ export default function AuthPage() {
                     id="signup-email"
                     name="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder="Your email address" // Changed from m@example.com
                     autoCapitalize="none"
                     autoComplete="email"
                     autoCorrect="off"
                     disabled={isLoading}
+                    className="placeholder:text-gray-400 placeholder:opacity-50" // Add this line
                   />
                 </div>
                 <div className="grid gap-2">
@@ -129,7 +133,7 @@ export default function AuthPage() {
                     disabled={isLoading}
                   />
                 </div>
-                <Button className="w-full mt-4" type="submit" disabled={isLoading}>
+                <Button className="w-full mt-4 dark:border dark:border-white" type="submit" disabled={isLoading}>
                   {isLoading && (
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                   )}

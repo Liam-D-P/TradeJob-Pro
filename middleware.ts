@@ -2,15 +2,17 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Redirect root to login
+  // If the request is for the root path
   if (request.nextUrl.pathname === '/') {
-    return NextResponse.redirect(new URL('/login', request.url));
+    // Redirect to the landing page
+    return NextResponse.redirect(new URL('/landing-page', request.url));
   }
 
-  // Temporarily allow access to dashboard without authentication
+  // For all other requests, continue as normal
   return NextResponse.next();
 }
 
+// Optionally, you can specify which routes this middleware applies to
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/login'],
+  matcher: '/',
 };
