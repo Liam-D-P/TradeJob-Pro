@@ -1,11 +1,13 @@
 'use client'
 
+import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
+import { LoginLink, RegisterLink, LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { CheckCircle, Zap, Building, BarChart, Calculator, ClipboardList, FileDown, PoundSterling } from "lucide-react"
+import { CheckCircle, Zap, Building, BarChart, Calculator, ClipboardList, PoundSterling } from "lucide-react"
 import ShimmerButton from "@/components/magicui/shimmer-button"
 import GradualSpacing from "@/components/magicui/gradual-spacing"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
@@ -14,19 +16,31 @@ import BlurFade from "@/components/magicui/blur-fade"
 import WordFadeIn from "@/components/magicui/word-fade-in"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { useState, useEffect } from "react"
+import { DollarSign, Package, Activity } from 'lucide-react'
+import { Badge } from "@/components/ui/badge"
+import { Eye, FileDown } from 'lucide-react'
+import { BorderBeam } from "@/components/magicui/border-beam"
+import { Calendar, PlusCircle } from 'lucide-react'
+import { Progress } from "@/components/ui/progress"
+import { Marquee } from "@/components/magicui/marquee"
 
 export default function LandingPage() {
   const router = useRouter()
+  const { isAuthenticated, user } = useKindeAuth();
+  const [userName, setUserName] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setUserName(user.given_name || user.family_name || user.email || 'User');
+    }
+  }, [isAuthenticated, user])
 
   const handleTryCalculator = () => {
     router.push('/login')
   }
 
-  const handleSignIn = () => {
-    router.push('/login')  // This assumes your login form is at the '/login' route
-  }
-
-  // Sample data for the chart
+  // Sample data for the charts
   const profitData = [
     { name: 'Jan', value: 1000 },
     { name: 'Feb', value: 1500 },
@@ -36,11 +50,35 @@ export default function LandingPage() {
     { name: 'Jun', value: 2400 },
   ]
 
+  const revenueData = [
+    { name: 'Jan', value: 4000 },
+    { name: 'Feb', value: 3000 },
+    { name: 'Mar', value: 5000 },
+    { name: 'Apr', value: 4500 },
+    { name: 'May', value: 6000 },
+    { name: 'Jun', value: 5500 },
+  ]
+
+  const materialCostData = [
+    { name: 'Jan', value: 2000 },
+    { name: 'Feb', value: 2200 },
+    { name: 'Mar', value: 1800 },
+    { name: 'Apr', value: 2400 },
+    { name: 'May', value: 2100 },
+    { name: 'Jun', value: 2300 },
+  ]
+
   // Sample materials data
   const materials = [
     { id: '1', name: 'Brick', cost: 0.5, unit: 'piece' },
     { id: '2', name: 'Cement', cost: 10, unit: 'bag' },
     { id: '3', name: 'Sand', cost: 25, unit: 'ton' },
+  ]
+
+  const sampleJobs = [
+    { id: '1', name: 'Kitchen Renovation', totalCost: 5000, status: 'active' },
+    { id: '2', name: 'Bathroom Remodel', totalCost: 3500, status: 'pending' },
+    { id: '3', name: 'Deck Construction', totalCost: 2800, status: 'completed' },
   ]
 
   return (
@@ -62,13 +100,31 @@ export default function LandingPage() {
             <Link className="text-sm font-medium hover:underline underline-offset-4" href="#faq">
               FAQ
             </Link>
-            <Button
-              variant="outline"
-              className="text-sm font-medium bg-black text-white dark:bg-white dark:text-black rounded-full px-4 py-2 transition-colors hover:bg-gray-800 dark:hover:bg-gray-200"
-              onClick={handleSignIn}
-            >
-              Sign In
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <span className="text-sm font-medium">
+                  Welcome, {userName}!
+                </span>
+                <Link href="/landing-page/profile" className="text-sm font-medium hover:underline underline-offset-4">
+                  Profile
+                </Link>
+                <Link href="/dashboard" className="text-sm font-medium hover:underline underline-offset-4">
+                  Go to Dashboard
+                </Link>
+                <LogoutLink className="text-sm font-medium bg-black text-white dark:bg-white dark:text-black rounded-full px-4 py-2 transition-colors hover:bg-gray-800 dark:hover:bg-gray-200">
+                  Log out
+                </LogoutLink>
+              </>
+            ) : (
+              <>
+                <LoginLink className="text-sm font-medium bg-black text-white dark:bg-white dark:text-black rounded-full px-4 py-2 transition-colors hover:bg-gray-800 dark:hover:bg-gray-200">
+                  Sign In
+                </LoginLink>
+                <RegisterLink className="text-sm font-medium">
+                  Sign Up
+                </RegisterLink>
+              </>
+            )}
             <ThemeToggle />
           </nav>
         </div>
@@ -96,18 +152,19 @@ export default function LandingPage() {
               />
             </div>
             <div className="z-10 flex justify-center space-x-4 mt-6 relative">
-              <ShimmerButton 
-                onClick={handleTryCalculator} 
-                className="shadow-2xl h-13 px-16 transition-all duration-300 ease-in-out hover:scale-105"
-                shimmerSize="0.30em"
-                shimmerColor="rgba(255, 255, 255, 1.0)"
-                shimmerDuration="2.5s"
-                background="rgba(0, 0, 0, 1)"
-              >
-                <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight text-white lg:text-lg">
-                  Try Now
-                </span>
-              </ShimmerButton>
+              <LoginLink>
+                <ShimmerButton 
+                  className="shadow-2xl h-13 px-16 transition-all duration-300 ease-in-out hover:scale-105"
+                  shimmerSize="0.30em"
+                  shimmerColor="rgba(255, 255, 255, 1.0)"
+                  shimmerDuration="2.5s"
+                  background="rgba(0, 0, 0, 1)"
+                >
+                  <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight text-white lg:text-lg">
+                    Try Now
+                  </span>
+                </ShimmerButton>
+              </LoginLink>
               <Button
                 variant="outline"
                 className="shadow-2xl h-12 px-12 py-6 text-sm lg:text-lg font-medium leading-none tracking-tight transition-all duration-300 ease-in-out hover:scale-105"
@@ -181,64 +238,230 @@ export default function LandingPage() {
             </section>
           </BlurFade>
 
+            
           {/* New Dashboard Preview Section */}
-          <section id="dashboard-preview" className="py-12 md:py-24 bg-gray-100 dark:bg-gray-900">
-            <div className="container mx-auto px-4 md:px-6">
-              <h2 className="text-3xl font-bold text-center mb-8">Powerful Tools at Your Fingertips</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Dashboard Preview */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Profit Overview</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[200px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={profitData}>
-                          <Line type="monotone" dataKey="value" stroke="#8884d8" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
+          <BlurFade>
+            <section id="dashboard-preview" className="py-12 md:py-24 bg-gray-100 dark:bg-gray-900">
+              <div className="container mx-auto px-4 md:px-6">
+                <h2 className="text-3xl font-bold text-center mb-8">Powerful Tools at Your Fingertips</h2>
+                <div className="mb-8">
+                  <Marquee className="py-4 [--gap:1rem]" pauseOnHover>
+                    {['Revenue Tracking', 'Material Costs', 'Job Calculator', 'Active Projects', 'Job Management', 'Project Timeline'].map((tool) => (
+                      <div key={tool} className="flex items-center gap-4 rounded-full border border-neutral-200 bg-white px-5 py-2 dark:border-neutral-800 dark:bg-black">
+                        <span className="text-sm font-medium">{tool}</span>
+                      </div>
+                    ))}
+                  </Marquee>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {/* Revenue Card */}
+                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                      <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                      <DollarSign className="h-4 w-4 text-primary" />
+                    </CardHeader>
+                    <CardContent className="pt-2">
+                      <div className="text-2xl font-bold text-primary">£22,222</div>
+                      <p className="text-xs text-muted-foreground mt-1">+20% from last month</p>
+                      <div className="h-[100px] mt-4">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={revenueData}>
+                            <Line type="monotone" dataKey="value" stroke="#8884d8" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <p className="mt-4 text-sm text-muted-foreground font-bold">
+                        Track your total revenue over time with our detailed charts. See how your revenue grows month by month and identify trends to make informed business decisions.
+                      </p>
+                    </CardContent>
+                  </Card>
 
-                {/* Job Calculator Preview */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Job Calculator</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Material</TableHead>
-                          <TableHead>Cost per Unit</TableHead>
-                          <TableHead>Unit</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {materials.map((material) => (
-                          <TableRow key={material.id}>
-                            <TableCell>{material.name}</TableCell>
-                            <TableCell>£{material.cost.toFixed(2)}</TableCell>
-                            <TableCell>{material.unit}</TableCell>
+                  {/* Material Costs Card */}
+                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                      <CardTitle className="text-sm font-medium">Material Costs</CardTitle>
+                      <Package className="h-4 w-4 text-primary" />
+                    </CardHeader>
+                    <CardContent className="pt-2">
+                      <div className="text-2xl font-bold text-primary">£12,222</div>
+                      <p className="text-xs text-muted-foreground mt-1">+4.75% from last month</p>
+                      <div className="h-[100px] mt-4">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={materialCostData}>
+                            <Line type="monotone" dataKey="value" stroke="#82ca9d" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <p className="mt-4 text-sm text-muted-foreground font-bold">
+                        Monitor your material costs with precision. Our charts help you keep track of expenses and identify cost-saving opportunities.
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Job Calculator Preview */}
+                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
+                    <CardHeader>
+                      <CardTitle>Job Calculator</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Material</TableHead>
+                            <TableHead>Cost per Unit</TableHead>
+                            <TableHead>Unit</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>Lime</TableCell>
+                            <TableCell>£10.00</TableCell>
+                            <TableCell>bag</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Sand</TableCell>
+                            <TableCell>£5.00</TableCell>
+                            <TableCell>bag</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Stone</TableCell>
+                            <TableCell>£20.00</TableCell>
+                            <TableCell>sqm</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                      <p className="mt-4 text-sm text-muted-foreground font-bold">
+                        Use our job calculator to estimate costs accurately. Input your materials and labor to get a detailed breakdown of your project expenses.
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Active Projects Card */}
+                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle>Active Projects</CardTitle>
+                      <Activity className="h-4 w-4 text-primary" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-primary mb-2">3</div>
+                      <p className="text-sm text-muted-foreground mb-4">2 completed this month</p>
+                      <ul className="space-y-2">
+                        <li className="flex justify-between items-center">
+                          <span>Project A</span>
+                          <span className="text-sm text-muted-foreground">In Progress</span>
+                        </li>
+                        <li className="flex justify-between items-center">
+                          <span>Project B</span>
+                          <span className="text-sm text-muted-foreground">Starting Soon</span>
+                        </li>
+                        <li className="flex justify-between items-center">
+                          <span>Project C</span>
+                          <span className="text-sm text-muted-foreground">In Progress</span>
+                        </li>
+                      </ul>
+                      <p className="mt-4 text-sm text-muted-foreground font-bold">
+                        Keep track of all your active projects. See their status at a glance and manage your workflow efficiently.
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Job Management Preview */}
+                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
+                    <CardHeader>
+                      <CardTitle>Job Management</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Job Name</TableHead>
+                            <TableHead>Total Cost</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {sampleJobs.map((job) => (
+                            <TableRow key={job.id}>
+                              <TableCell>{job.name}</TableCell>
+                              <TableCell>£{job.totalCost.toFixed(2)}</TableCell>
+                              <TableCell>
+                                <Badge
+                                  className={
+                                    job.status === 'active'
+                                      ? 'bg-green-500'
+                                      : job.status === 'pending'
+                                      ? 'bg-yellow-500'
+                                      : 'bg-blue-500'
+                                  }
+                                >
+                                  {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center space-x-2">
+                                  <Button variant="outline" size="sm">
+                                    <Eye className="h-4 w-4 mr-1" /> View
+                                  </Button>
+                                  <Button variant="outline" size="sm">
+                                    <FileDown className="h-4 w-4 mr-1" /> PDF
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      <p className="mt-4 text-sm text-muted-foreground font-bold">
+                        Manage your jobs effectively with our job management tool. Track costs, statuses, and generate reports with ease.
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Project Timeline Card */}
+                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle>Project Timeline</CardTitle>
+                      <Calendar className="h-4 w-4 text-primary" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span>Kitchen Renovation</span>
+                          <Progress value={75} className="w-1/2" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Bathroom Remodel</span>
+                          <Progress value={30} className="w-1/2" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Deck Construction</span>
+                          <Progress value={90} className="w-1/2" />
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" className="mt-4">
+                        <PlusCircle className="h-4 w-4 mr-1" /> Add Project
+                      </Button>
+                      <p className="mt-4 text-sm text-muted-foreground font-bold">
+                        Visualize your project timelines and track progress. Ensure timely completion of tasks and manage deadlines effectively.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </BlurFade>
 
           {/* Pricing Section */}
           <section id="pricing" className="py-12 md:py-24">
             <h2 className="text-3xl font-bold text-center mb-8">Pricing Plans</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Card>
                 <CardHeader>
                   <CardTitle>Basic</CardTitle>
@@ -256,7 +479,8 @@ export default function LandingPage() {
                   <Button className="w-full">Get Started</Button>
                 </CardFooter>
               </Card>
-              <Card className="border-primary">
+              <Card className="relative">
+                <BorderBeam duration={7} borderWidth={6} /> 
                 <CardHeader>
                   <CardTitle>Pro</CardTitle>
                   <CardDescription>For growing businesses</CardDescription>
@@ -274,24 +498,46 @@ export default function LandingPage() {
                   <Button className="w-full">Get Started</Button>
                 </CardFooter>
               </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Enterprise</CardTitle>
-                  <CardDescription>For large organizations</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-3xl font-bold">Custom</p>
-                  <ul className="mt-4 space-y-2">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Custom features</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Dedicated account manager</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> 24/7 premium support</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> On-site training</li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full">Contact Sales</Button>
-                </CardFooter>
-              </Card>
+            </div>
+          </section>
+
+          {/* Feature Comparison Table Section */}
+          <section id="feature-comparison" className="py-12 md:py-24 bg-white dark:bg-gray-800">
+            <div className="container mx-auto px-4 md:px-6">
+              <h2 className="text-3xl font-bold text-center mb-8">Compare Our Plans</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white dark:bg-gray-800">
+                  <thead>
+                    <tr>
+                      <th className="py-2 px-4 border-b text-left">Feature</th>
+                      <th className="py-2 px-4 border-b text-left">Basic</th>
+                      <th className="py-2 px-4 border-b text-left">Pro</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="py-2 px-4 border-b text-left">Job Costing</td>
+                      <td className="py-2 px-4 border-b text-left">Basic</td>
+                      <td className="py-2 px-4 border-b text-left">Advanced</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-4 border-b text-left">Projects</td>
+                      <td className="py-2 px-4 border-b text-left">Up to 10</td>
+                      <td className="py-2 px-4 border-b text-left">Unlimited</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-4 border-b text-left">Support</td>
+                      <td className="py-2 px-4 border-b text-left">Email</td>
+                      <td className="py-2 px-4 border-b text-left">Priority</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-4 border-b text-left">Profit Analysis</td>
+                      <td className="py-2 px-4 border-b text-left">No</td>
+                      <td className="py-2 px-4 border-b text-left">Yes</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </section>
 

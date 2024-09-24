@@ -9,8 +9,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Icons } from "@/components/ui/icons"
 import { useToast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { LoginLink } from "@kinde-oss/kinde-auth-nextjs/server";
 
-export default function AuthPage() {
+const AuthPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
   const { toast } = useToast()
@@ -186,4 +187,12 @@ export default function AuthPage() {
       </Card>
     </div>
   )
+}
+
+export default function LoginForm() {
+  return (
+    <LoginLink className="your-button-styles">
+      Sign In with Kinde
+    </LoginLink>
+  );
 }

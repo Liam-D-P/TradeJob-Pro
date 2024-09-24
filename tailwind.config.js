@@ -2,9 +2,10 @@
 module.exports = {
     darkMode: 'class',
     content: [
-      "./app/**/*.{js,ts,jsx,tsx,mdx}",
-      "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-      "./components/**/*.{js,ts,jsx,tsx,mdx}",
+      "./app/**/*.{ts,tsx}",
+      "./pages/**/*.{ts,tsx}",
+      "./components/**/*.{ts,tsx}",
+      "./src/**/*.{ts,tsx}",
     ],
     theme: {
       extend: {
@@ -22,8 +23,10 @@ module.exports = {
           popover: 'hsl(var(--popover))',
           'popover-foreground': 'hsl(var(--popover-foreground))',
   
-          primary: 'hsl(var(--primary))',
-          'primary-foreground': 'hsl(var(--primary-foreground))',
+          primary: {
+            DEFAULT: 'hsl(var(--primary))',
+            foreground: 'hsl(var(--primary-foreground))',
+          },
   
           secondary: 'hsl(var(--secondary))',
           'secondary-foreground': 'hsl(var(--secondary-foreground))',
@@ -45,6 +48,12 @@ module.exports = {
         animation: {
           "spin-around": "spin-around calc(var(--speed) * 2) infinite linear",
           slide: "slide var(--speed) ease-in-out infinite alternate",
+          // New animation
+          "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+          marquee: "marquee 25s linear infinite",
+          'marquee-reverse': 'marquee 25s linear infinite reverse',
+          marquee: 'marquee 25s linear infinite',
+          'marquee-reverse': 'marquee 25s linear infinite reverse',
         },
         keyframes: {
           "spin-around": {
@@ -65,6 +74,24 @@ module.exports = {
             to: {
               transform: "translate(calc(100cqw - 100%), 0)",
             },
+          },
+          // New keyframes
+          "border-beam": {
+            "100%": {
+              "offset-distance": "100%",
+            },
+          },
+          marquee: {
+            from: { transform: "translateX(0)" },
+            to: { transform: "translateX(calc(-100% - var(--gap)))" },
+          },
+          "marquee-vertical": {
+            from: { transform: "translateY(0)" },
+            to: { transform: "translateY(calc(-100% - var(--gap)))" },
+          },
+          marquee: {
+            '0%': { transform: 'translateX(0%)' },
+            '100%': { transform: 'translateX(-100%)' },
           },
         },
         textShadow: {

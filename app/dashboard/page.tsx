@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from 'react';
-import Dashboard from '@/components/dashboard';
+import Dashboard from '@/app/dashboard/dashboard';
 
 export default function DashboardPage() {
     console.log('DashboardPage component rendering started');

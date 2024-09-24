@@ -20,6 +20,11 @@ import 'jspdf-autotable'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useRouter } from 'next/navigation'
+import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
+import { Progress } from "@/components/ui/progress"
+import { Switch } from "@/components/ui/switch"
+import { UserProfile } from "@/app/dashboard/profile/user-profile"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 const NumberTicker = ({ value }: { value: number }) => {
   const [displayValue, setDisplayValue] = useState(0)
@@ -117,14 +122,20 @@ type DashboardItem = {
 export default function Dashboard() {
   console.log('Dashboard component rendered');
 
+  const { isAuthenticated, user } = useKindeAuth();
+  const [userName, setUserName] = useState<string | null>(null);
+
   useEffect(() => {
     console.log('Dashboard component mounted');
-  }, []);
+    if (isAuthenticated && user) {
+      setUserName(user.given_name || user.family_name || user.email || 'User');
+    }
+  }, [isAuthenticated, user]);
 
-  return <DashboardComponent />;
+  return <DashboardComponent userName={userName} />;
 }
 
-function DashboardComponent() {
+function DashboardComponent({ userName }: { userName: string | null }) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('DASH')
   const [materials, setMaterials] = useState<Material[]>([])
@@ -137,10 +148,11 @@ function DashboardComponent() {
   const [activeProjects, setActiveProjects] = useState<Job[]>([])
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const { toast } = useToast()
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false);
 
   const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
+    name: userName || 'User',
+    email: '', // You can add the email here if needed
     avatar: '/placeholder.svg?height=100&width=100',
   }
 
@@ -353,16 +365,18 @@ function DashboardComponent() {
   }
 
   const renderDashboardItem = (item: DashboardItem) => {
+    const cardClasses = "bg-white dark:bg-gray-700 shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg border border-gray-200 dark:border-gray-600";
+
     switch (item.id) {
       case 'profit':
         return (
-          <Card>
+          <Card className={cardClasses}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Profit</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">£<NumberTicker value={profitData[profitData.length - 1].value} /></div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">£<NumberTicker value={profitData[profitData.length - 1].value} /></div>
               <p className="text-xs text-muted-foreground mt-1">+20% from last month</p>
               <div className="h-[100px] mt-4">
                 <ResponsiveContainer width="100%" height="100%">
@@ -379,13 +393,13 @@ function DashboardComponent() {
         )
       case 'revenue':
         return (
-          <Card>
+          <Card className={cardClasses}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="pt-2">
-              <div className="text-2xl font-bold">£<NumberTicker value={revenue} /></div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">£<NumberTicker value={revenue} /></div>
               <p className="text-xs text-muted-foreground mt-1">+20% from last month</p>
               <div className="h-[100px] mt-4">
                 <ResponsiveContainer width="100%" height="100%">
@@ -402,13 +416,13 @@ function DashboardComponent() {
         )
       case 'materialCosts':
         return (
-          <Card>
+          <Card className={cardClasses}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
               <CardTitle className="text-sm font-medium">Material Costs</CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="pt-2">
-              <div className="text-2xl font-bold">£<NumberTicker value={materialCosts} /></div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">£<NumberTicker value={materialCosts} /></div>
               <p className="text-xs text-muted-foreground mt-1">+4.75% from last month</p>
               <div className="h-[100px] mt-4">
                 <ResponsiveContainer width="100%" height="100%">
@@ -425,16 +439,16 @@ function DashboardComponent() {
         )
       case 'upcomingJobs':
         return (
-          <Card>
+          <Card className={cardClasses}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
               <CardTitle className="text-sm font-medium">Upcoming Jobs</CardTitle>
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="pt-2">
-              <div className="text-2xl font-bold">+<NumberTicker value={getUpcomingJobs().length} /></div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">+<NumberTicker value={getUpcomingJobs().length} /></div>
               <ul className="mt-2 space-y-2">
                 {getUpcomingJobs().map(job => (
-                  <li key={job.id} className="flex justify-between items-center text-sm">
+                  <li key={job.id} className="flex justify-between items-center text-sm text-gray-900 dark:text-gray-100">
                     <span>{job.name}</span>
                     <span>£{job.totalPrice.toFixed(2)} - {format(job.startDate!, 'MMM dd, yyyy')}</span>
                   </li>
@@ -445,17 +459,17 @@ function DashboardComponent() {
         )
       case 'activeProjects':
         return (
-          <Card>
+          <Card className={cardClasses}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle>Active Projects</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Active Jobs</CardTitle>
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold mb-2">{activeProjects.length}</div>
+              <div className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">{activeProjects.length}</div>
               <p className="text-sm text-muted-foreground mb-4">2 completed this month</p>
               <ul className="space-y-2">
                 {activeProjects.map(job => (
-                  <li key={job.id} className="flex justify-between items-center">
+                  <li key={job.id} className="flex justify-between items-center text-gray-900 dark:text-gray-100">
                     <span>{job.name}</span>
                     <span className="text-sm text-muted-foreground">
                       {job.startDate ? format(job.startDate, 'MMM dd, yyyy') : 'Not scheduled'}
@@ -472,54 +486,87 @@ function DashboardComponent() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Narrow Side Menu */}
-      <div className="w-16 bg-black text-white flex flex-col items-center py-4">
-        <nav className="space-y-4">
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      {/* Side Menu */}
+      <div 
+        className={`bg-gray-800 dark:bg-black text-white flex flex-col items-start py-4 transition-all duration-300 ease-in-out ${
+          isMenuExpanded ? 'w-48' : 'w-16'
+        }`}
+        onMouseEnter={() => setIsMenuExpanded(true)}
+        onMouseLeave={() => setIsMenuExpanded(false)}
+      >
+        <nav className="space-y-4 w-full">
           <Button
             variant={activeTab === 'DASH' ? 'default' : 'ghost'}
-            size="icon"
-            className="w-12 h-12"
+            className={`w-full h-12 flex items-center justify-start px-4 transition-all duration-300 ease-in-out ${
+              isMenuExpanded ? 'pl-4' : 'pl-4'
+            } hover:bg-gray-800`}
             onClick={() => setActiveTab('DASH')}
           >
-            <LayoutDashboard className="h-6 w-6" />
+            <LayoutDashboard className="h-6 w-6 min-w-[24px]" />
+            <span className={`ml-2 overflow-hidden transition-all duration-300 ease-in-out ${
+              isMenuExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'
+            }`}>
+              Dashboard
+            </span>
           </Button>
           <Button
             variant={activeTab === 'CALC' ? 'default' : 'ghost'}
-            size="icon"
-            className="w-12 h-12"
+            className={`w-full h-12 flex items-center justify-start px-4 transition-all duration-300 ease-in-out ${
+              isMenuExpanded ? 'pl-4' : 'pl-4'
+            } hover:bg-gray-800`}
             onClick={() => setActiveTab('CALC')}
           >
-            <Calculator className="h-6 w-6" />
+            <Calculator className="h-6 w-6 min-w-[24px]" />
+            <span className={`ml-2 overflow-hidden transition-all duration-300 ease-in-out ${
+              isMenuExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'
+            }`}>
+              Calculator
+            </span>
           </Button>
           <Button
             variant={activeTab === 'JOBS' ? 'default' : 'ghost'}
-            size="icon"
-            className="w-12 h-12"
+            className={`w-full h-12 flex items-center justify-start px-4 transition-all duration-300 ease-in-out ${
+              isMenuExpanded ? 'pl-4' : 'pl-4'
+            } hover:bg-gray-800`}
             onClick={() => setActiveTab('JOBS')}
           >
-            <ClipboardList className="h-6 w-6" />
+            <ClipboardList className="h-6 w-6 min-w-[24px]" />
+            <span className={`ml-2 overflow-hidden transition-all duration-300 ease-in-out ${
+              isMenuExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'
+            }`}>
+              Jobs
+            </span>
           </Button>
           <Button
             variant={activeTab === 'PROFILE' ? 'default' : 'ghost'}
-            size="icon"
-            className="w-12 h-12"
+            className={`w-full h-12 flex items-center justify-start px-4 transition-all duration-300 ease-in-out ${
+              isMenuExpanded ? 'pl-4' : 'pl-4'
+            } hover:bg-gray-800`}
             onClick={() => setActiveTab('PROFILE')}
           >
-            <User className="h-6 w-6" />
+            <User className="h-6 w-6 min-w-[24px]" />
+            <span className={`ml-2 overflow-hidden transition-all duration-300 ease-in-out ${
+              isMenuExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'
+            }`}>
+              Profile
+            </span>
           </Button>
         </nav>
+        <div className="mt-auto px-4">
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-8 overflow-auto bg-white">
+      <div className="flex-1 p-8 overflow-auto bg-white dark:bg-gray-800">
         {activeTab === 'DASH' && (
           <>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">Dashboard</h2>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" className="border-gray-300 dark:border-gray-600">
                     <Settings className="mr-2 h-4 w-4" />
                     Edit Layout
                   </Button>
@@ -548,7 +595,7 @@ function DashboardComponent() {
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {dashboardItems
                 .filter((item) => visibleItems.includes(item.id))
                 .map((item) => (
@@ -561,7 +608,7 @@ function DashboardComponent() {
         )}
 
         {activeTab === 'CALC' && (
-          <Card>
+          <Card className="bg-white dark:bg-gray-700 shadow-md rounded-lg border border-gray-200 dark:border-gray-600">
             <CardHeader>
               <CardTitle>Job Calculator</CardTitle>
             </CardHeader>
@@ -575,6 +622,7 @@ function DashboardComponent() {
                       value={newMaterial.name}
                       onChange={(e) => setNewMaterial({...newMaterial, name: e.target.value})}
                       placeholder="e.g., Brick, Cement"
+                      className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                     />
                   </div>
                   <div>
@@ -585,6 +633,7 @@ function DashboardComponent() {
                       value={newMaterial.cost || ''}
                       onChange={(e) => setNewMaterial({...newMaterial, cost: Number(e.target.value)})}
                       placeholder="Cost per unit"
+                      className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                     />
                   </div>
                   <div>
@@ -594,10 +643,11 @@ function DashboardComponent() {
                       value={newMaterial.unit}
                       onChange={(e) => setNewMaterial({...newMaterial, unit: e.target.value})}
                       placeholder="e.g., bag, sqm, hour"
+                      className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                     />
                   </div>
                 </div>
-                <Button onClick={addMaterial}>Add New Material</Button>
+                <Button onClick={addMaterial} className="bg-blue-500 hover:bg-blue-600 text-white">Add New Material</Button>
               </div>
 
               <Table className="mt-6">
@@ -682,7 +732,7 @@ function DashboardComponent() {
         )}
 
         {activeTab === 'JOBS' && (
-          <Card>
+          <Card className="bg-white dark:bg-gray-700 shadow-md rounded-lg border border-gray-200 dark:border-gray-600">
             <CardHeader>
               <CardTitle>Job Management</CardTitle>
             </CardHeader>
@@ -820,32 +870,16 @@ function DashboardComponent() {
         )}
 
         {activeTab === 'PROFILE' && (
-          <Card>
+          <Card className="bg-white dark:bg-gray-700 shadow-md rounded-lg border border-gray-200 dark:border-gray-600">
             <CardHeader>
               <CardTitle>User Profile</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-8">
-                <div className="flex items-center space-x-4">
-                  <Avatar className="w-20 h-20">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h2 className="text-2xl font-bold">{user.name}</h2>
-                    <p className="text-muted-foreground">{user.email}</p>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <Button variant="outline" onClick={() => setActiveTab('DASH')}>
-                    Back to Dashboard
-                  </Button>
-                  <Button className="bg-red-500 text-white hover:bg-red-600" onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" /> Log Out
-                  </Button>
-                </div>
-              </div>
+              <UserProfile
+                user={user}
+                activeProjects={activeProjects}
+                handleLogout={handleLogout}
+              />
             </CardContent>
           </Card>
         )}
