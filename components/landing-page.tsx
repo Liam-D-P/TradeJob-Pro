@@ -21,7 +21,6 @@ import { DollarSign, Package, Activity } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { Eye, FileDown } from 'lucide-react'
 import { BorderBeam } from "@/components/magicui/border-beam"
-import { Calendar, PlusCircle } from 'lucide-react'
 import { Progress } from "@/components/ui/progress"
 import { Marquee } from "@/components/magicui/marquee"
 
@@ -180,7 +179,7 @@ export default function LandingPage() {
             <section id="features" className="py-12 md:py-24">
               <h2 className="text-3xl font-bold text-center mb-8">Key Features</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <Card>
+                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
                   <CardHeader>
                     <Calculator className="h-8 w-8 mb-2 text-primary" />
                     <CardTitle>Advanced Job Costing</CardTitle>
@@ -189,7 +188,7 @@ export default function LandingPage() {
                     Precise calculations for materials, labor, and overhead costs. Customize and save your frequently used materials.
                   </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
                   <CardHeader>
                     <Zap className="h-8 w-8 mb-2 text-primary" />
                     <CardTitle>Efficient Workflow</CardTitle>
@@ -198,7 +197,7 @@ export default function LandingPage() {
                     Streamline your estimating process and save valuable time. Manage multiple projects with ease.
                   </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
                   <CardHeader>
                     <BarChart className="h-8 w-8 mb-2 text-primary" />
                     <CardTitle>Profit Analysis</CardTitle>
@@ -207,7 +206,7 @@ export default function LandingPage() {
                     Visualize your profit margins and make informed decisions. Track revenue and costs for each project.
                   </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
                   <CardHeader>
                     <ClipboardList className="h-8 w-8 mb-2 text-primary" />
                     <CardTitle>Job Management</CardTitle>
@@ -216,7 +215,7 @@ export default function LandingPage() {
                     Easily manage and track the status of your jobs from pending to completed. Schedule start dates and monitor progress.
                   </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
                   <CardHeader>
                     <PoundSterling className="h-8 w-8 mb-2 text-primary" />
                     <CardTitle>Revenue Reporting</CardTitle>
@@ -225,7 +224,7 @@ export default function LandingPage() {
                     Report and analyze revenue for completed jobs. Get insights into your most profitable projects.
                   </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
                   <CardHeader>
                     <FileDown className="h-8 w-8 mb-2 text-primary" />
                     <CardTitle>PDF Export</CardTitle>
@@ -246,7 +245,7 @@ export default function LandingPage() {
                 <h2 className="text-3xl font-bold text-center mb-8">Powerful Tools at Your Fingertips</h2>
                 <div className="mb-8">
                   <Marquee className="py-4 [--gap:1rem]" pauseOnHover>
-                    {['Revenue Tracking', 'Material Costs', 'Job Calculator', 'Active Projects', 'Job Management', 'Project Timeline'].map((tool) => (
+                    {['Revenue Tracking', 'Material Costs', 'Job Calculator', 'Active Projects', 'Job Management', 'PDF Job Breakdown'].map((tool) => (
                       <div key={tool} className="flex items-center gap-4 rounded-full border border-neutral-200 bg-white px-5 py-2 dark:border-neutral-800 dark:bg-black">
                         <span className="text-sm font-medium">{tool}</span>
                       </div>
@@ -424,32 +423,53 @@ export default function LandingPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Project Timeline Card */}
+                  {/* PDF Generation Card */}
                   <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle>Project Timeline</CardTitle>
-                      <Calendar className="h-4 w-4 text-primary" />
+                      <CardTitle>PDF Job Breakdown</CardTitle>
+                      <FileDown className="h-4 w-4 text-primary" />
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2">
+                      <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <span>Kitchen Renovation</span>
-                          <Progress value={75} className="w-1/2" />
+                          <span className="font-medium">Job: Kitchen Renovation</span>
+                          <Badge variant="outline">Ready for Export</Badge>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span>Bathroom Remodel</span>
-                          <Progress value={30} className="w-1/2" />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span>Deck Construction</span>
-                          <Progress value={90} className="w-1/2" />
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Material</TableHead>
+                              <TableHead>Quantity</TableHead>
+                              <TableHead>Cost</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell>Tiles</TableCell>
+                              <TableCell>50 sqm</TableCell>
+                              <TableCell>£500</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>Paint</TableCell>
+                              <TableCell>10 L</TableCell>
+                              <TableCell>£100</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>Labor</TableCell>
+                              <TableCell>40 hours</TableCell>
+                              <TableCell>£1000</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold">Total Cost: £1600</span>
+                          <Button variant="default" size="sm">
+                            <FileDown className="h-4 w-4 mr-1" /> Generate PDF
+                          </Button>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm" className="mt-4">
-                        <PlusCircle className="h-4 w-4 mr-1" /> Add Project
-                      </Button>
                       <p className="mt-4 text-sm text-muted-foreground font-bold">
-                        Visualize your project timelines and track progress. Ensure timely completion of tasks and manage deadlines effectively.
+                        Generate detailed PDF reports for your job breakdowns. Include material costs, quantities, and labor expenses. Perfect for sharing with clients or keeping for your records.
                       </p>
                     </CardContent>
                   </Card>
@@ -468,10 +488,10 @@ export default function LandingPage() {
                   <CardDescription>For small businesses</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold">£29/mo</p>
+                  <p className="text-3xl font-bold">£12/mo</p>
                   <ul className="mt-4 space-y-2">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Basic job costing</li>
                     <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Up to 10 projects</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Basic job costing</li>
                     <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Email support</li>
                   </ul>
                 </CardContent>
@@ -486,10 +506,10 @@ export default function LandingPage() {
                   <CardDescription>For growing businesses</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold">£79/mo</p>
+                  <p className="text-3xl font-bold">£20/mo</p>
                   <ul className="mt-4 space-y-2">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Advanced job costing</li>
                     <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Unlimited projects</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Advanced job costing</li>
                     <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Priority support</li>
                     <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Profit analysis tools</li>
                   </ul>
@@ -546,27 +566,33 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
             <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
               <AccordionItem value="item-1">
-                <AccordionTrigger>How accurate is the job cost calculator?</AccordionTrigger>
+                <AccordionTrigger>How does TradeJob Pro help me manage my projects?</AccordionTrigger>
                 <AccordionContent>
-                  Our job cost calculator is highly accurate, using up-to-date pricing data and customizable inputs. However, the final accuracy depends on the information you provide. We recommend regularly updating your material and labor costs to ensure the most precise estimates.
+                  TradeJob Pro offers a comprehensive project management solution. You can create and track multiple jobs, estimate costs accurately, monitor project timelines, and analyze profitability. Our dashboard gives you a clear overview of all your active projects, helping you stay organized and efficient.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
-                <AccordionTrigger>Can I customize the calculator for my specific trade?</AccordionTrigger>
+                <AccordionTrigger>Can I customize material costs and labor rates?</AccordionTrigger>
                 <AccordionContent>
-                  Yes, the job cost calculator is fully customizable. You can add your own materials, adjust labor rates, and set custom overhead and profit margins. This flexibility ensures that the calculator works for your unique business needs, regardless of your specific trade.
+                  Absolutely! TradeJob Pro allows you to input and customize your own material costs and labor rates. You can easily update these as prices change, ensuring your estimates and calculations are always based on the most current data. This flexibility makes our tool suitable for various trades and regions.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
-                <AccordionTrigger>Is my data secure with TradeJob Pro?</AccordionTrigger>
+                <AccordionTrigger>How does the profit analysis feature work?</AccordionTrigger>
                 <AccordionContent>
-                  Absolutely. We take data security very seriously. All your information, including your job costs and financial data, is encrypted and stored securely. We use industry-standard security protocols to ensure your business data remains private and protected.
+                  Our profit analysis tool provides detailed insights into your project finances. It compares estimated costs against actual expenses, calculates profit margins, and presents the data in easy-to-understand charts and reports. This feature helps you identify your most profitable jobs and areas where you can improve efficiency.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-4">
-                <AccordionTrigger>Can I try the job cost calculator before subscribing?</AccordionTrigger>
+                <AccordionTrigger>Is it easy to generate professional quotes for clients?</AccordionTrigger>
                 <AccordionContent>
-                  Yes, we offer a free trial that includes access to our job cost calculator. This allows you to test the accuracy and ease of use before committing to a subscription. Sign up for the trial to see how TradeJob Pro can benefit your business.
+                  Yes, TradeJob Pro makes it simple to create professional quotes. Once you&apos;ve input your project details and costs, you can generate a detailed PDF report with a breakdown of materials, labor, and other expenses. This feature helps you present clear, professional estimates to your clients, potentially improving your chances of winning bids.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-5">
+                <AccordionTrigger>Can I access TradeJob Pro on my mobile device?</AccordionTrigger>
+                <AccordionContent>
+                  Yes, TradeJob Pro is designed to be responsive and work on various devices, including smartphones and tablets. This allows you to access your project information, update job statuses, and even create estimates while on the go, directly from the job site.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

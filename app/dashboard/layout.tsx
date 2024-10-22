@@ -1,8 +1,5 @@
-import { Inter } from 'next/font/google'
 import { Toaster } from "@/components/ui/toaster"
 import '../globals.css' // Updated path
-
-const inter = Inter({ subsets: ['latin'] })
 
 export default function DashboardLayout({
   children,
@@ -11,11 +8,12 @@ export default function DashboardLayout({
 }) {
   console.log('DashboardLayout rendering');
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <Toaster />
+    <div className="flex h-screen bg-black overflow-hidden">
+      {/* <Sidebar /> */}
+      <main className="flex-1 overflow-y-auto">
         {children}
-      </body>
-    </html>
+      </main>
+      <Toaster />
+    </div>
   );
 }
