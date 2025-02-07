@@ -8,16 +8,6 @@
     --foreground: 222.2 84% 4.9%;
     
     /* ... other light mode variables ... */
-    
-    --color-1: 0 100% 63%;
-    
-    --color-2: 270 100% 63%;
-    
-    --color-3: 210 100% 63%;
-    
-    --color-4: 195 100% 63%;
-    
-    --color-5: 90 100% 63%;
   }
 
   .dark {
@@ -25,16 +15,6 @@
     --foreground: 210 40% 98%;
     
     /* ... other dark mode variables ... */
-    
-    --color-1: 0 100% 63%;
-    
-    --color-2: 270 100% 63%;
-    
-    --color-3: 210 100% 63%;
-    
-    --color-4: 195 100% 63%;
-    
-    --color-5: 90 100% 63%;
   }
 }
 
@@ -61,13 +41,4 @@ body {
 
 .animate-float {
   animation: float 8s ease-in-out infinite;
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }
