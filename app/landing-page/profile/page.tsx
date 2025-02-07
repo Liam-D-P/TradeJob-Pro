@@ -11,17 +11,35 @@ import { Progress } from "@/components/ui/progress"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { Building } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
+  console.log("ProfilePage component rendering")
   const { user, isAuthenticated } = useKindeAuth()
   const [userName, setUserName] = useState<string | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      setUserName(user.given_name || user.family_name || user.email || 'User');
+    console.log("ProfilePage useEffect triggered", { isAuthenticated, user })
+    
+    if (!isAuthenticated) {
+      console.log("User not authenticated, redirecting to login")
+      router.push('/login')
+      return
     }
-  }, [isAuthenticated, user])
+    
+    if (isAuthenticated && user) {
+      console.log("Setting username for authenticated user")
+      setUserName(user.given_name || user.family_name || user.email || 'User')
+    }
+  }, [isAuthenticated, user, router])
 
+  if (!isAuthenticated) {
+    console.log("Rendering null due to no authentication")
+    return null
+  }
+
+  console.log("Rendering profile page content")
   return (
     <div className="min-h-screen flex flex-col bg-background dark:bg-background-dark">
       <header className="fixed top-0 left-0 right-0 z-50">
@@ -46,7 +64,10 @@ export default function ProfilePage() {
                 <span className="text-sm font-medium">
                   Welcome, {userName}!
                 </span>
-                <Link href="/dashboard/profile" className="text-sm font-medium">
+                <Link 
+                  href="/landing-page/profile" 
+                  className="text-sm font-medium"
+                >
                   Profile
                 </Link>
                 <Link href="/dashboard" className="text-sm font-medium">

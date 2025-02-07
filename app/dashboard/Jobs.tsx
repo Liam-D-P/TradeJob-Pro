@@ -1,335 +1,242 @@
-import React, { useState} from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
+
+import { useState } from "react"
+import { Calendar, Play, Eye, Search, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { format } from "date-fns"
-import { useToast } from "@/components/ui/use-toast"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
-import { jsPDF } from 'jspdf'
-import 'jspdf-autotable'
-import { Calendar as CalendarIcon, Play, Square, Eye } from 'lucide-react'
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Progress } from "@/components/ui/progress"
 import { useJobs } from "@/app/context/JobContext"
+import { format } from 'date-fns'
 
-type Material = {
+interface Job {
   id: string
   name: string
-  cost: number
-  unit: string
-  quantity: number
-}
-
-type Job = {
-  id: string
-  name: string
-  materials: Material[]
-  totalPrice: number
-  status: 'pending' | 'scheduled' | 'active' | 'completed'
-  startDate?: Date
+  status: "pending" | "completed" | "scheduled" | "active"
+  startDate: Date | null
   revenue?: number
   profit?: number
-}
-
-const StatusBadge = ({ status }: { status: Job['status'] }) => {
-  const colorMap = {
-    pending: 'bg-yellow-500',
-    scheduled: 'bg-blue-500',
-    active: 'bg-green-500',
-    completed: 'bg-gray-500'
-  }
-
-  return (
-    <Badge className={`${colorMap[status]} text-white`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </Badge>
-  )
+  completionDate?: Date
+  materials: Array<{
+    id: string
+    name: string
+    cost: number
+    quantity: number
+    unit: string
+  }>
+  totalPrice?: number
+  progress?: number
 }
 
 export function Jobs() {
   const { jobs, updateJob } = useJobs()
-  const { toast } = useToast()
-  const [tempRevenue, setTempRevenue] = useState('');
+  const [sortBy, setSortBy] = useState<"date" | "name" | "cost">("date")
+  const [filterStatus, setFilterStatus] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState("")
 
-  const startJob = (jobId: string) => {
-    const job = jobs.find(job => job.id === jobId)
-    if (job) {
-      updateJob({ ...job, status: 'active' })
-      toast({
-        title: "Job Started",
-        description: `${job.name} has been started.`,
-      })
+  const parseDate = (dateString: string | Date | null | undefined) => {
+    if (!dateString) return null;
+    if (dateString instanceof Date) return dateString;
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? null : date;
+    } catch {
+      return null;
     }
-  }
+  };
 
-  const endJob = (jobId: string) => {
-    const job = jobs.find(job => job.id === jobId)
-    if (job) {
-      updateJob({ ...job, status: 'completed' })
-      toast({
-        title: "Job Completed",
-        description: `${job.name} has been marked as completed.`,
-      })
-    }
-  }
-
-  const scheduleJob = (jobId: string, date: Date) => {
-    const job = jobs.find(job => job.id === jobId)
-    if (job) {
-      updateJob({ ...job, startDate: date, status: 'scheduled' })
-      toast({
-        title: "Job Scheduled",
-        description: `${job.name} has been scheduled for ${format(date, 'MMM dd, yyyy')}.`,
-      })
-    }
-  }
-
-  const updateJobRevenue = (jobId: string, revenue: number) => {
-    const job = jobs.find(job => job.id === jobId)
-    if (job) {
-      updateJob({ ...job, revenue, profit: revenue - job.totalPrice })
-      toast({
-        title: "Revenue Updated",
-        description: `Revenue for the job has been updated.`,
-      })
-    }
-  }
-
-  const generatePDF = (job: Job) => {
-    const doc = new jsPDF()
-
-    // Set font styles
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(18)
-    doc.setTextColor(0, 102, 204) // RGB color for blue
-
-    // Add title
-    doc.text(`Job Breakdown: ${job.name}`, 20, 20)
-
-    // Reset font for normal text
-    doc.setFont("helvetica", "normal")
-    doc.setFontSize(12)
-    doc.setTextColor(0, 0, 0) // Black color
-
-    // Add total cost
-    doc.text(`Total Cost: £${job.totalPrice.toFixed(2)}`, 20, 30)
-    
-    const tableData = job.materials.map(m => [m.name, m.quantity, m.unit, `£${m.cost.toFixed(2)}`, `£${(m.quantity * m.cost).toFixed(2)}`])
-    
-    // @ts-expect-error: jsPDF types are not fully compatible with the autoTable plugin
-    doc.autoTable({
-      head: [['Material', 'Quantity', 'Unit', 'Cost per Unit', 'Total']],
-      body: tableData,
-      startY: 40,
-      styles: { fontSize: 10, cellPadding: 2 },
-      headStyles: { fillColor: [0, 102, 204], textColor: 255 }, // Blue background, white text
-      alternateRowStyles: { fillColor: [240, 240, 240] }, // Light gray for alternate rows
-      margin: { top: 40 },
+  const filteredJobs = jobs
+    .filter((job) => {
+      if (filterStatus === "all") return true
+      return job.status === filterStatus
     })
-    // Add footer
-    const pageCount = doc.internal.pages.length
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setFontSize(10)
-      doc.setTextColor(150)
-      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' })
+    .filter((job) => job.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "date":
+          const dateA = parseDate(a.startDate)
+          const dateB = parseDate(b.startDate)
+          if (!dateA && !dateB) return 0
+          if (!dateA) return 1
+          if (!dateB) return -1
+          return dateB.getTime() - dateA.getTime()
+        case "name":
+          return a.name.localeCompare(b.name)
+        case "cost":
+          const aCost = a.materials.reduce((sum, m) => sum + m.cost * m.quantity, 0)
+          const bCost = b.materials.reduce((sum, m) => sum + m.cost * m.quantity, 0)
+          return bCost - aCost
+        default:
+          return 0
+      }
+    })
+
+  const getStatusColor = (status: "pending" | "completed" | "scheduled" | "active") => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-500"
+      case "active":
+        return "bg-blue-500"
+      case "completed":
+        return "bg-green-500"
+      case "scheduled":
+        return "bg-purple-500"
+      default:
+        return "bg-gray-500"
     }
-    
-    doc.save(`${job.name}_breakdown.pdf`)
-    
-    toast({
-      title: "PDF Generated",
-      description: `Job breakdown for ${job.name} has been saved as a PDF.`,
+  }
+
+  const handleViewDetails = (job: Job) => {
+    console.log("View details for job:", job)
+  }
+  const handleStartJob = (job: Job) => {
+    updateJob({
+      ...job,
+      status: "active", 
+      startDate: new Date(),
+      totalPrice: job.materials.reduce((sum, m) => sum + m.cost * m.quantity, 0)
     })
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Jobs</h2>
-      <Card>
-        <CardHeader>
-          <CardTitle>Saved Jobs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Total Cost</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>Revenue</TableHead>
-                <TableHead>Profit</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {jobs.map(job => (
-                <TableRow key={job.id}>
-                  <TableCell>{job.name}</TableCell>
-                  <TableCell>£{job.totalPrice.toFixed(2)}</TableCell>
-                  <TableCell><StatusBadge status={job.status} /></TableCell>
-                  <TableCell>{job.startDate ? format(job.startDate, 'MMM dd, yyyy') : 'Not scheduled'}</TableCell>
-                  <TableCell>{job.revenue ? `£${job.revenue.toFixed(2)}` : '-'}</TableCell>
-                  <TableCell>{job.profit ? `£${job.profit.toFixed(2)}` : '-'}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      {(job.status === 'pending' || job.status === 'scheduled') && (
-                        <>
-                          <Button
-                            onClick={() => startJob(job.id)}
-                            className="hover:bg-green-600 transition-colors duration-200"
-                          >
-                            <Play className="h-4 w-4 mr-2" />
-                            Start
-                          </Button>
-                          
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                className="hover:bg-blue-600/80 transition-colors duration-200"
-                              >
-                                <CalendarIcon className="h-4 w-4 mr-2" />
-                                Schedule
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                              <Calendar
-                                mode="single"
-                                selected={job.startDate}
-                                onSelect={(date) => date && scheduleJob(job.id, date)}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </>
-                      )}
-                      {job.status === 'active' && (
-                        <Button
-                          onClick={() => endJob(job.id)}
-                          className="hover:bg-red-600 transition-colors duration-200"
-                        >
-                          <Square className="h-4 w-4 mr-2" />
-                          End
-                        </Button>
-                      )}
-                      {job.status === 'completed' && !job.revenue && (
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              className="hover:bg-purple-600/50 transition-colors duration-200"
-                            >
-                              £ Add Revenue
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Add Revenue for {job.name}</DialogTitle>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="revenue" className="text-right">
-                                  Revenue
-                                </Label>
-                                <Input
-                                  id="revenue"
-                                  type="text"
-                                  className="col-span-3"
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9.]/g, '');
-                                    const numericValue = parseFloat(value);
-                                    if (!isNaN(numericValue) && numericValue >= 0) {
-                                      updateJobRevenue(job.id, numericValue);
-                                    }
-                                  }}
-                                />
-                              </div>
-                            </div>
-                            <DialogFooter>
-                              <Button onClick={() => {
-                                const numericValue = parseFloat(tempRevenue);
-                                if (!isNaN(numericValue) && numericValue >= 0) {
-                                  updateJobRevenue(job.id, numericValue);
-                                  setTempRevenue('');
-                                } else {
-                                  toast({
-                                    title: "Invalid Input",
-                                    description: "Please enter a valid non-negative number.",
-                                    variant: "destructive"
-                                  });
-                                }
-                              }}>
-                                Confirm
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                      )}
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            className="hover:bg-gray-700/50 transition-colors duration-200"
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>{job.name} Details</DialogTitle>
-                          </DialogHeader>
-                          <div className="mt-4">
-                            <h3 className="text-lg font-semibold mb-2">Job Summary</h3>
-                            <Table>
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell className="font-medium">Total Cost</TableCell>
-                                  <TableCell>£{job.totalPrice.toFixed(2)}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell className="font-medium">Revenue</TableCell>
-                                  <TableCell>{job.revenue ? `£${job.revenue.toFixed(2)}` : '-'}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell className="font-medium">Profit</TableCell>
-                                  <TableCell>{job.profit ? `£${job.profit.toFixed(2)}` : '-'}</TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-grow">
+        <div className="px-2">
+          <div className="mb-6 flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold">Jobs</h1>
+              <Badge variant="secondary" className="h-7 rounded-full px-1">
+                {jobs.length} total
+              </Badge>
+            </div>
 
-                            <h3 className="text-lg font-semibold mb-2 mt-4">Materials</h3>
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Material</TableHead>
-                                  <TableHead>Quantity</TableHead>
-                                  <TableHead>Cost</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {job.materials.map((material) => (
-                                  <TableRow key={material.id}>
-                                    <TableCell>{material.name}</TableCell>
-                                    <TableCell>{material.quantity} {material.unit}</TableCell>
-                                    <TableCell>£{(material.cost * material.quantity).toFixed(2)}</TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                            <Button className="mt-4" onClick={() => generatePDF(job)}>Save as PDF</Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+            {/* Search and Filters */}
+            <div className="flex flex-col gap-4 md:flex-row">
+              <div className="relative md:max-w-xs">
+                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                <Input
+                  placeholder="Search jobs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="md:max-w-xs">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={(value: "date" | "name" | "cost") => setSortBy(value)}>
+                <SelectTrigger className="md:max-w-xs">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date">
+                    <div className="flex items-center">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Sort by Date
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </SelectItem>
+                  <SelectItem value="name">
+                    <div className="flex items-center">
+                      <ArrowUpDown className="mr-2 h-4 w-4" />
+                      Sort by Name
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="cost">
+                    <div className="flex items-center">
+                      <ArrowUpDown className="mr-2 h-4 w-4" />
+                      Sort by Cost
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Jobs List */}
+          <div className="space-y-4">
+            {filteredJobs.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No jobs found. Add jobs from the calculator page.
+              </div>
+            ) : (
+              filteredJobs.map((job) => (
+                <Card key={job.id} className="bg-white">
+                  <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-xl break-words">{job.name}</CardTitle>
+                    <Badge variant="secondary" className={`${getStatusColor(job.status)} text-white`}>
+                      {job.status.replace("_", " ")}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground break-words">Total Cost</p>
+                          <p className="text-lg font-semibold break-words">£{(job.materials.reduce((sum, m) => sum + m.cost * m.quantity, 0)).toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground break-words">Start Date</p>
+                          <p className="text-lg font-semibold break-words">
+                            {job.startDate ? format(parseDate(job.startDate) || new Date(), 'PPP') : "Not scheduled"}
+                          </p>
+                        </div>
+                        {job.revenue !== undefined && (
+                          <>
+                            <div>
+                              <p className="text-sm text-muted-foreground break-words">Revenue</p>
+                              <p className="text-lg font-semibold break-words">£{job.revenue.toFixed(2)}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground break-words">Profit</p>
+                              <p className="text-lg font-semibold break-words">£{job.profit?.toFixed(2)}</p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        {job.status === "pending" && (
+                          <>
+                            <Button className="w-full" size="lg" onClick={() => handleStartJob(job as any)}>
+                              <Play className="mr-2 h-4 w-4" />
+                              Start
+                            </Button>
+                            <Button variant="outline" className="w-full" size="lg">
+                              <Calendar className="mr-2 h-4 w-4" />
+                              Schedule
+                            </Button>
+                          </>
+                        )}
+                        <Button variant="secondary" className="w-full" size="lg" onClick={() => handleViewDetails(job as any)}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Details
+                        </Button>
+                        {job.status === "completed" && (
+                          <div className="mt-4">
+                            <p className="text-sm text-muted-foreground mb-2">Completion Progress</p>
+                            <Progress value={100} className="w-full" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

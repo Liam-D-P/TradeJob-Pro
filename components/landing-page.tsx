@@ -5,24 +5,17 @@ import { LoginLink, RegisterLink, LogoutLink } from "@kinde-oss/kinde-auth-nextj
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { CheckCircle, Zap, Building, BarChart, Calculator, ClipboardList, PoundSterling } from "lucide-react"
-import ShimmerButton from "@/components/magicui/shimmer-button"
-import GradualSpacing from "@/components/magicui/gradual-spacing"
+import { CheckCircle, Zap, HardHat, BarChart, Calculator, ClipboardList, PoundSterling, Save, PlusCircle, Eye, FileDown, Quote, UserPlus, Package } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import DotPattern from "@/components/magicui/dot-pattern"
-import BlurFade from "@/components/magicui/blur-fade"
 import WordFadeIn from "@/components/magicui/word-fade-in"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useState, useEffect } from "react"
-import { DollarSign, Package, Activity } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
-import { Eye, FileDown } from 'lucide-react'
 import { BorderBeam } from "@/components/magicui/border-beam"
 import { Progress } from "@/components/ui/progress"
-import { Marquee } from "@/components/magicui/marquee"
+import { Input } from "@/components/ui/input"
 
 export default function LandingPage() {
   const router = useRouter()
@@ -39,7 +32,7 @@ export default function LandingPage() {
     router.push('/login')
   }
 
-  // Sample data for the charts
+  // Sample data for the charts - keep only what's used
   const profitData = [
     { name: 'Jan', value: 1000 },
     { name: 'Feb', value: 1500 },
@@ -49,24 +42,6 @@ export default function LandingPage() {
     { name: 'Jun', value: 2400 },
   ]
 
-  const revenueData = [
-    { name: 'Jan', value: 4000 },
-    { name: 'Feb', value: 3000 },
-    { name: 'Mar', value: 5000 },
-    { name: 'Apr', value: 4500 },
-    { name: 'May', value: 6000 },
-    { name: 'Jun', value: 5500 },
-  ]
-
-  const materialCostData = [
-    { name: 'Jan', value: 2000 },
-    { name: 'Feb', value: 2200 },
-    { name: 'Mar', value: 1800 },
-    { name: 'Apr', value: 2400 },
-    { name: 'May', value: 2100 },
-    { name: 'Jun', value: 2300 },
-  ]
-
   // Sample materials data
   const materials = [
     { id: '1', name: 'Brick', cost: 0.5, unit: 'piece' },
@@ -74,11 +49,17 @@ export default function LandingPage() {
     { id: '3', name: 'Sand', cost: 25, unit: 'ton' },
   ]
 
-  const sampleJobs = [
-    { id: '1', name: 'Kitchen Renovation', totalCost: 5000, status: 'active' },
-    { id: '2', name: 'Bathroom Remodel', totalCost: 3500, status: 'pending' },
-    { id: '3', name: 'Deck Construction', totalCost: 2800, status: 'completed' },
-  ]
+  // Section Divider Component
+  const SectionDivider = () => (
+    <div className="relative h-32 overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-neutral-200 dark:via-neutral-800 to-transparent" />
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-40 h-40 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-background dark:bg-background-dark">
@@ -86,7 +67,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background/0 backdrop-blur-sm" />
         <div className="relative px-4 lg:px-6 h-14 flex items-center">
           <Link className="flex items-center justify-center" href="#">
-            <Building className="h-6 w-6 mr-2" />
+            <HardHat className="h-6 w-6 mr-2" />
             <span className="font-bold">TradeJob Pro</span>
           </Link>
           <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
@@ -104,24 +85,48 @@ export default function LandingPage() {
                 <span className="text-sm font-medium">
                   Welcome, {userName}!
                 </span>
-                <Link href="/landing-page/profile" className="text-sm font-medium hover:underline underline-offset-4">
+                <Link 
+                  href="/profile" 
+                  className="text-sm font-medium"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('Profile link clicked, checking auth...');
+                    if (isAuthenticated) {
+                      console.log('User is authenticated, navigating to profile');
+                      router.push('/dashboard/profile');
+                    } else {
+                      console.log('User is not authenticated, redirecting to login');
+                      router.push('/login');
+                    }
+                  }}
+                >
                   Profile
                 </Link>
-                <Link href="/dashboard" className="text-sm font-medium hover:underline underline-offset-4">
+                <Link 
+                  href="/dashboard" 
+                  className="text-sm font-medium"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('Dashboard link clicked, checking auth...');
+                    if (isAuthenticated) {
+                      console.log('User is authenticated, navigating to dashboard');
+                      router.push('/dashboard');
+                    } else {
+                      console.log('User is not authenticated, redirecting to login');
+                      router.push('/login');
+                    }
+                  }}
+                >
                   Go to Dashboard
                 </Link>
-                <LogoutLink className="text-sm font-medium bg-black text-white dark:bg-white dark:text-black rounded-full px-4 py-2 transition-colors hover:bg-gray-800 dark:hover:bg-gray-200">
+                <LogoutLink>
                   Log out
                 </LogoutLink>
               </>
             ) : (
               <>
-                <LoginLink className="text-sm font-medium bg-black text-white dark:bg-white dark:text-black rounded-full px-4 py-2 transition-colors hover:bg-gray-800 dark:hover:bg-gray-200">
-                  Sign In
-                </LoginLink>
-                <RegisterLink className="text-sm font-medium">
-                  Sign Up
-                </RegisterLink>
+                <LoginLink>Sign In</LoginLink>
+                <RegisterLink>Sign Up</RegisterLink>
               </>
             )}
             <ThemeToggle />
@@ -130,472 +135,752 @@ export default function LandingPage() {
       </header>
       <main className="flex-grow pt-14"> {/* Add padding-top to account for fixed header */}
         <div className="container mx-auto px-4 md:px-6">
-          <section className="w-full py-12 md:py-24 relative overflow-hidden">
-            <DotPattern 
-              width={32}
-              height={32}
-              cx={1}
-              cy={1}
-              cr={3}
-              className="absolute inset-0 h-full w-full text-gray-200 dark:text-gray-800 opacity-70"
-            />
-            <div className="space-y-4 text-center relative z-10">
-              <GradualSpacing 
-                text="Precise Job Costs for Trade Professionals"
-                className="font-display text-center text-4xl font-bold tracking-[-0.1em] text-black dark:text-white md:text-7xl md:leading-[5rem] drop-shadow-lg"
-                duration={0.7}
-              />
-              <WordFadeIn
-                words="Streamline your estimates with our advanced job cost calculator. Boost accuracy and profitability in every project."
-                className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400"
-              />
+          <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 relative overflow-hidden">
+            {/* Subtle grid background */}
+            <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
+            
+            {/* Subtle gradient glow effects */}
+            <div className="absolute inset-0">
+              <div className="absolute top-1/4 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse [animation-delay:2s]" />
             </div>
-            <div className="z-10 flex justify-center space-x-4 mt-6 relative">
-              <LoginLink>
-                <ShimmerButton 
-                  className="shadow-2xl h-13 px-16 transition-all duration-300 ease-in-out hover:scale-105"
-                  shimmerSize="0.30em"
-                  shimmerColor="rgba(255, 255, 255, 1.0)"
-                  shimmerDuration="2.5s"
-                  background="rgba(0, 0, 0, 1)"
-                >
-                  <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight text-white lg:text-lg">
-                    Try Now
-                  </span>
-                </ShimmerButton>
-              </LoginLink>
-              <Button
-                variant="outline"
-                className="shadow-2xl h-12 px-12 py-6 text-sm lg:text-lg font-medium leading-none tracking-tight transition-all duration-300 ease-in-out hover:scale-105"
-                onClick={() => router.push('/learn-more')}
-              >
-                Learn More
-              </Button>
+
+            {/* Optional: Floating particles effect */}
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute w-2 h-2 bg-primary/20 rounded-full animate-float" style={{ top: '20%', left: '10%' }} />
+              <div className="absolute w-2 h-2 bg-secondary/20 rounded-full animate-float" style={{ top: '60%', right: '20%' }} />
+              <div className="absolute w-2 h-2 bg-primary/20 rounded-full animate-float" style={{ bottom: '20%', left: '30%' }} />
+            </div>
+
+            <div className="relative z-10 max-w-5xl mx-auto space-y-8">
+              <div className="space-y-6 text-center">
+                <div className="space-y-4 relative">
+                  <div className="inline-block animate-fade-in [--animation-delay:200ms]">
+                    <div className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm dark:border-neutral-800 dark:bg-black">
+                      <span className="block w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
+                      <span className="text-sm font-medium">New Features Available</span>
+                    </div>
+                  </div>
+
+                  <WordFadeIn
+                    words="Stop guessing. Start pricing with confidence. Our advanced calculator helps trade professionals boost accuracy and profitability on every project."
+                    className="mx-auto max-w-[700px] text-gray-600 dark:text-gray-400 text-xl md:text-2xl leading-relaxed"
+                  />
+
+                  <div className="grid grid-cols-3 gap-4 md:gap-8 py-8 animate-fade-in [--animation-delay:400ms]">
+                    {[
+                      { label: "Active Users", value: "2,000+" },
+                      { label: "Projects Managed", value: "₤10M+" },
+                      { label: "Time Saved", value: "1,000hrs" }
+                    ].map((stat, i) => (
+                      <div key={i} className="space-y-2">
+                        <h4 className="text-2xl md:text-4xl font-bold text-primary">{stat.value}</h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in [--animation-delay:600ms]">
+                    {isAuthenticated ? (
+                      <Button
+                        className="shadow-2xl h-14 px-8 sm:px-16 transition-all duration-300 ease-out hover:scale-105 hover:shadow-primary/25 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                        onClick={() => {
+                          console.log('Navigating to dashboard...');
+                          router.push('/dashboard');
+                        }}
+                      >
+                        Go to Dashboard
+                      </Button>
+                    ) : (
+                      <LoginLink className="w-full sm:w-auto">
+                        <Button
+                          className="w-full shadow-2xl h-14 px-8 sm:px-16 transition-all duration-300 ease-out hover:scale-105 hover:shadow-primary/25 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                        >
+                          <span className="flex items-center gap-2 text-lg font-semibold">
+                            Try Now
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                              <path d="M6.5 3.5l4 4.5-4 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </span>
+                        </Button>
+                      </LoginLink>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      className="h-14 px-8 sm:px-16 text-lg font-semibold transition-all duration-300 ease-out hover:scale-105 hover:bg-primary/10"
+                      onClick={() => router.push('/learn-more')}
+                    >
+                      See How It Works
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
           
+          <SectionDivider />
+
           {/* Features Section */}
-          <BlurFade>
-            <section id="features" className="py-12 md:py-24">
-              <h2 className="text-3xl font-bold text-center mb-8">Key Features</h2>
+          <section id="features" className="py-24 md:py-32">
+            <div className="container px-4 mx-auto">
+              {/* Section Header */}
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm dark:border-neutral-800 dark:bg-black mb-4">
+                  <span className="text-sm font-medium">Powerful Features</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything you need to manage your jobs</h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                  Streamline your trade business with our comprehensive suite of tools designed for professionals like you.
+                </p>
+              </div>
+
+              {/* Features Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
-                  <CardHeader>
-                    <Calculator className="h-8 w-8 mb-2 text-primary" />
-                    <CardTitle>Advanced Job Costing</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    Precise calculations for materials, labor, and overhead costs. Customize and save your frequently used materials.
-                  </CardContent>
-                </Card>
-                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
-                  <CardHeader>
-                    <Zap className="h-8 w-8 mb-2 text-primary" />
-                    <CardTitle>Efficient Workflow</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    Streamline your estimating process and save valuable time. Manage multiple projects with ease.
-                  </CardContent>
-                </Card>
-                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
-                  <CardHeader>
-                    <BarChart className="h-8 w-8 mb-2 text-primary" />
-                    <CardTitle>Profit Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    Visualize your profit margins and make informed decisions. Track revenue and costs for each project.
-                  </CardContent>
-                </Card>
-                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
-                  <CardHeader>
-                    <ClipboardList className="h-8 w-8 mb-2 text-primary" />
-                    <CardTitle>Job Management</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    Easily manage and track the status of your jobs from pending to completed. Schedule start dates and monitor progress.
-                  </CardContent>
-                </Card>
-                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
-                  <CardHeader>
-                    <PoundSterling className="h-8 w-8 mb-2 text-primary" />
-                    <CardTitle>Revenue Reporting</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    Report and analyze revenue for completed jobs. Get insights into your most profitable projects.
-                  </CardContent>
-                </Card>
-                <Card className="shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300"> {/* Added shadow and border */}
-                  <CardHeader>
-                    <FileDown className="h-8 w-8 mb-2 text-primary" />
-                    <CardTitle>PDF Export</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    Generate professional PDF reports for your job breakdowns. Share detailed cost estimates with clients or team members.
-                  </CardContent>
-                </Card>
-              </div>
-            </section>
-          </BlurFade>
+                {[
+                  {
+                    icon: <Calculator className="h-8 w-8 text-primary" />,
+                    title: "Advanced Job Costing",
+                    description: "Precise calculations for materials, labor, and overhead costs. Customize and save your frequently used materials."
+                  },
+                  {
+                    icon: <Zap className="h-8 w-8 text-primary" />,
+                    title: "Efficient Workflow",
+                    description: "Streamline your estimating process and save valuable time. Manage multiple projects with ease."
+                  },
+                  {
+                    icon: <BarChart className="h-8 w-8 text-primary" />,
+                    title: "Profit Analysis",
+                    description: "Visualize your profit margins and make informed decisions. Track revenue and costs for each project."
+                  },
+                  {
+                    icon: <ClipboardList className="h-8 w-8 text-primary" />,
+                    title: "Job Management",
+                    description: "Easily manage and track the status of your jobs from pending to completed. Schedule start dates and monitor progress."
+                  },
+                  {
+                    icon: <PoundSterling className="h-8 w-8 text-primary" />,
+                    title: "Revenue Reporting",
+                    description: "Report and analyze revenue for completed jobs. Get insights into your most profitable projects."
+                  },
+                  {
+                    icon: <FileDown className="h-8 w-8 text-primary" />,
+                    title: "PDF Export",
+                    description: "Generate professional PDF reports for your job breakdowns. Share detailed cost estimates with clients."
+                  }
+                ].map((feature, i) => (
+                  <div 
+                    key={i}
+                    className="group relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 hover:border-primary/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10"
+                  >
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Content */}
+                    <div className="relative z-10">
+                      <div className="mb-4 inline-flex items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 p-2">
+                        {feature.icon}
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                      <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
+                    </div>
 
+                    {/* Corner accent */}
+                    <div className="absolute -right-4 -bottom-4 h-24 w-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors duration-300" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <SectionDivider />
+
+          {/* Dashboard Preview Section */}
+          <section id="dashboard-preview" className="py-24 relative overflow-hidden">
+            {/* Enhanced background effects */}
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900" />
+            <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
+            <div className="absolute inset-0">
+              <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-3xl animate-pulse [animation-delay:2s]" />
+            </div>
             
-          {/* New Dashboard Preview Section */}
-          <BlurFade>
-            <section id="dashboard-preview" className="py-12 md:py-24 bg-gray-100 dark:bg-gray-900">
-              <div className="container mx-auto px-4 md:px-6">
-                <h2 className="text-3xl font-bold text-center mb-8">Powerful Tools at Your Fingertips</h2>
-                <div className="mb-8">
-                  <Marquee className="py-4 [--gap:1rem]" pauseOnHover>
-                    {['Revenue Tracking', 'Material Costs', 'Job Calculator', 'Active Projects', 'Job Management', 'PDF Job Breakdown'].map((tool) => (
-                      <div key={tool} className="flex items-center gap-4 rounded-full border border-neutral-200 bg-white px-5 py-2 dark:border-neutral-800 dark:bg-black">
-                        <span className="text-sm font-medium">{tool}</span>
-                      </div>
-                    ))}
-                  </Marquee>
+            <div className="container mx-auto px-4 md:px-6 relative z-10">
+              {/* Section Header */}
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm dark:border-neutral-800 dark:bg-black mb-4">
+                  <span className="block w-2 h-2 rounded-full bg-primary mr-2 animate-pulse" />
+                  <span className="text-sm font-medium">Live Preview</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {/* Revenue Card */}
-                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-                      <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                      <DollarSign className="h-4 w-4 text-primary" />
-                    </CardHeader>
-                    <CardContent className="pt-2">
-                      <div className="text-2xl font-bold text-primary">£22,222</div>
-                      <p className="text-xs text-muted-foreground mt-1">+20% from last month</p>
-                      <div className="h-[100px] mt-4">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={revenueData}>
-                            <Line type="monotone" dataKey="value" stroke="#8884d8" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <p className="mt-4 text-sm text-muted-foreground font-bold">
-                        Track your total revenue over time with our detailed charts. See how your revenue grows month by month and identify trends to make informed business decisions.
-                      </p>
-                    </CardContent>
-                  </Card>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Powerful Tools for Trade Professionals</h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                  Experience how TradeJob Pro transforms your business operations.
+                </p>
+              </div>
 
-                  {/* Material Costs Card */}
-                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-                      <CardTitle className="text-sm font-medium">Material Costs</CardTitle>
-                      <Package className="h-4 w-4 text-primary" />
-                    </CardHeader>
-                    <CardContent className="pt-2">
-                      <div className="text-2xl font-bold text-primary">£12,222</div>
-                      <p className="text-xs text-muted-foreground mt-1">+4.75% from last month</p>
-                      <div className="h-[100px] mt-4">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={materialCostData}>
-                            <Line type="monotone" dataKey="value" stroke="#82ca9d" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <p className="mt-4 text-sm text-muted-foreground font-bold">
-                        Monitor your material costs with precision. Our charts help you keep track of expenses and identify cost-saving opportunities.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  {/* Job Calculator Preview */}
-                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
-                    <CardHeader>
-                      <CardTitle>Job Calculator</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Material</TableHead>
-                            <TableHead>Cost per Unit</TableHead>
-                            <TableHead>Unit</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell>Lime</TableCell>
-                            <TableCell>£10.00</TableCell>
-                            <TableCell>bag</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Sand</TableCell>
-                            <TableCell>£5.00</TableCell>
-                            <TableCell>bag</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Stone</TableCell>
-                            <TableCell>£20.00</TableCell>
-                            <TableCell>sqm</TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                      <p className="mt-4 text-sm text-muted-foreground font-bold">
-                        Use our job calculator to estimate costs accurately. Input your materials and labor to get a detailed breakdown of your project expenses.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  {/* Active Projects Card */}
-                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle>Active Projects</CardTitle>
-                      <Activity className="h-4 w-4 text-primary" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-primary mb-2">3</div>
-                      <p className="text-sm text-muted-foreground mb-4">2 completed this month</p>
-                      <ul className="space-y-2">
-                        <li className="flex justify-between items-center">
-                          <span>Project A</span>
-                          <span className="text-sm text-muted-foreground">In Progress</span>
-                        </li>
-                        <li className="flex justify-between items-center">
-                          <span>Project B</span>
-                          <span className="text-sm text-muted-foreground">Starting Soon</span>
-                        </li>
-                        <li className="flex justify-between items-center">
-                          <span>Project C</span>
-                          <span className="text-sm text-muted-foreground">In Progress</span>
-                        </li>
-                      </ul>
-                      <p className="mt-4 text-sm text-muted-foreground font-bold">
-                        Keep track of all your active projects. See their status at a glance and manage your workflow efficiently.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  {/* Job Management Preview */}
-                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
-                    <CardHeader>
-                      <CardTitle>Job Management</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Job Name</TableHead>
-                            <TableHead>Total Cost</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {sampleJobs.map((job) => (
-                            <TableRow key={job.id}>
-                              <TableCell>{job.name}</TableCell>
-                              <TableCell>£{job.totalCost.toFixed(2)}</TableCell>
-                              <TableCell>
-                                <Badge
-                                  className={
-                                    job.status === 'active'
-                                      ? 'bg-green-500'
-                                      : job.status === 'pending'
-                                      ? 'bg-yellow-500'
-                                      : 'bg-blue-500'
-                                  }
-                                >
-                                  {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center space-x-2">
-                                  <Button variant="outline" size="sm">
-                                    <Eye className="h-4 w-4 mr-1" /> View
-                                  </Button>
-                                  <Button variant="outline" size="sm">
-                                    <FileDown className="h-4 w-4 mr-1" /> PDF
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                      <p className="mt-4 text-sm text-muted-foreground font-bold">
-                        Manage your jobs effectively with our job management tool. Track costs, statuses, and generate reports with ease.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  {/* PDF Generation Card */}
-                  <Card className="shadow-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform transform hover:scale-105">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle>PDF Job Breakdown</CardTitle>
-                      <FileDown className="h-4 w-4 text-primary" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
+              {/* Interactive Preview Tabs */}
+              <div className="max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Calculator Preview */}
+                  <Card className="group relative overflow-hidden border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+                    {/* Border Beam Container */}
+                    <div className="absolute inset-0">
+                      <BorderBeam 
+                        size={300}
+                        duration={8}
+                        anchor={90}
+                        borderWidth={1.5}
+                        colorFrom="#ffaa40"
+                        colorTo="#9c40ff"
+                        className="opacity-50"
+                      />
+                    </div>
+                    
+                    {/* Content Container */}
+                    <div className="relative z-10">
+                      <CardHeader>
                         <div className="flex items-center justify-between">
-                          <span className="font-medium">Job: Kitchen Renovation</span>
-                          <Badge variant="outline">Ready for Export</Badge>
+                          <CardTitle className="flex items-center gap-2">
+                            <Calculator className="h-5 w-5 text-primary" />
+                            Smart Calculator
+                          </CardTitle>
+                          <Badge variant="outline" className="bg-primary/10 text-primary">Live Demo</Badge>
                         </div>
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Material</TableHead>
-                              <TableHead>Quantity</TableHead>
-                              <TableHead>Cost</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>Tiles</TableCell>
-                              <TableCell>50 sqm</TableCell>
-                              <TableCell>£500</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>Paint</TableCell>
-                              <TableCell>10 L</TableCell>
-                              <TableCell>£100</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>Labor</TableCell>
-                              <TableCell>40 hours</TableCell>
-                              <TableCell>£1000</TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold">Total Cost: £1600</span>
-                          <Button variant="default" size="sm">
-                            <FileDown className="h-4 w-4 mr-1" /> Generate PDF
-                          </Button>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-6">
+                          {/* Quick Add Material Form */}
+                          <div className="grid grid-cols-3 gap-4 p-4 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900">
+                            <Input placeholder="Material Name" className="bg-white dark:bg-gray-800" />
+                            <Input placeholder="£0.00" className="bg-white dark:bg-gray-800" />
+                            <Button className="bg-primary hover:bg-primary/90">
+                              <PlusCircle className="h-4 w-4 mr-2" /> Add
+                            </Button>
+                          </div>
+
+                          {/* Materials Table */}
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Material</TableHead>
+                                <TableHead>Cost/Unit</TableHead>
+                                <TableHead className="text-right">Total</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {[
+                                { name: 'Premium Tiles', cost: 45, quantity: 20, total: 900 },
+                                { name: 'Adhesive', cost: 15, quantity: 5, total: 75 },
+                                { name: 'Labor', cost: 35, quantity: 8, total: 280 },
+                              ].map((item, i) => (
+                                <TableRow key={i} className="group/row">
+                                  <TableCell className="font-medium">{item.name}</TableCell>
+                                  <TableCell>£{item.cost}</TableCell>
+                                  <TableCell className="text-right">£{item.total}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+
+                          {/* Total and Actions */}
+                          <div className="flex items-center justify-between p-4 rounded-lg bg-neutral-50 dark:bg-neutral-900">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Total Cost</p>
+                              <p className="text-2xl font-bold text-primary">£1,255.00</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline">
+                                <FileDown className="h-4 w-4 mr-2" /> Export PDF
+                              </Button>
+                              <Button className="bg-primary">
+                                <Save className="h-4 w-4 mr-2" /> Save Job
+                              </Button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <p className="mt-4 text-sm text-muted-foreground font-bold">
-                        Generate detailed PDF reports for your job breakdowns. Include material costs, quantities, and labor expenses. Perfect for sharing with clients or keeping for your records.
-                      </p>
-                    </CardContent>
+                      </CardContent>
+                    </div>
                   </Card>
+
+                  {/* Jobs Management Preview */}
+                  <Card className="group relative overflow-hidden border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+                    {/* Border Beam Container */}
+                    <div className="absolute inset-0">
+                      <BorderBeam 
+                        size={300}
+                        duration={8}
+                        anchor={90}
+                        borderWidth={1.5}
+                        colorFrom="#9c40ff"
+                        colorTo="#ffaa40"
+                        delay={2}
+                        className="opacity-50"
+                      />
+                    </div>
+                    
+                    {/* Content Container */}
+                    <div className="relative z-10">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="flex items-center gap-2">
+                            <ClipboardList className="h-5 w-5 text-primary" />
+                            Jobs Dashboard
+                          </CardTitle>
+                          <Badge variant="outline" className="bg-primary/10 text-primary">Live Demo</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {/* Active Job Card */}
+                          <div className="p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-3">
+                            <div className="flex justify-between items-center">
+                              <h3 className="font-semibold">Luxury Bathroom Renovation</h3>
+                              <Badge className="bg-blue-500">In Progress</Badge>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="text-muted-foreground">Budget</p>
+                                <p className="font-semibold">£8,500</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground">Timeline</p>
+                                <p className="font-semibold">2 weeks</p>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-sm">
+                                <span>Progress</span>
+                                <span>75%</span>
+                              </div>
+                              <Progress value={75} className="h-2" />
+                            </div>
+                          </div>
+
+                          {/* Recent Jobs List */}
+                          <div className="space-y-2">
+                            {[
+                              { name: 'Kitchen Remodel', status: 'completed', cost: '£12,000', date: '2 days ago' },
+                              { name: 'Deck Installation', status: 'pending', cost: '£4,500', date: '5 days ago' },
+                            ].map((job, i) => (
+                              <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-primary/50 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    job.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'
+                                  }`} />
+                                  <div>
+                                    <p className="font-medium">{job.name}</p>
+                                    <p className="text-sm text-muted-foreground">{job.date}</p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-medium">{job.cost}</p>
+                                  <Badge variant="outline" className="text-xs">
+                                    {job.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Quick Actions */}
+                          <div className="flex gap-2 pt-2">
+                            <Button className="flex-1 bg-primary">
+                              <PlusCircle className="h-4 w-4 mr-2" /> New Job
+                            </Button>
+                            <Button variant="outline" className="flex-1">
+                              <Eye className="h-4 w-4 mr-2" /> View All
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Feature Highlights - Below Previews */}
+                <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                  {[
+                    { icon: Calculator, title: "Smart Calculations", desc: "Instant cost calculations with material and labor tracking" },
+                    { icon: Save, title: "Auto-Save", desc: "Never lose your work with automatic progress saving" },
+                    { icon: BarChart, title: "Real-time Analytics", desc: "Track job progress and profitability instantly" },
+                    { icon: FileDown, title: "PDF Export", desc: "Generate professional reports with one click" },
+                  ].map((feature, i) => (
+                    <div key={i} className="group relative overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800 p-6 hover:border-primary/50 transition-colors">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <feature.icon className="h-8 w-8 text-primary mb-4" />
+                      <h3 className="font-semibold mb-2">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </section>
-          </BlurFade>
+            </div>
+          </section>
+
+          <SectionDivider />
 
           {/* Pricing Section */}
-          <section id="pricing" className="py-12 md:py-24">
-            <h2 className="text-3xl font-bold text-center mb-8">Pricing Plans</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Basic</CardTitle>
-                  <CardDescription>For small businesses</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-3xl font-bold">£12/mo</p>
-                  <ul className="mt-4 space-y-2">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Up to 10 projects</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Basic job costing</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Email support</li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full">Get Started</Button>
-                </CardFooter>
-              </Card>
-              <Card className="relative">
-                <BorderBeam duration={7} borderWidth={6} /> 
-                <CardHeader>
-                  <CardTitle>Pro</CardTitle>
-                  <CardDescription>For growing businesses</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-3xl font-bold">£20/mo</p>
-                  <ul className="mt-4 space-y-2">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Unlimited projects</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Advanced job costing</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Priority support</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-primary" /> Profit analysis tools</li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full">Get Started</Button>
-                </CardFooter>
-              </Card>
-            </div>
-          </section>
+          <section id="pricing" className="py-24 relative overflow-hidden">
+            {/* Background effects */}
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900" />
+            <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
+            
+            <div className="container mx-auto px-4 md:px-6 relative z-10">
+              {/* Section Header */}
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm dark:border-neutral-800 dark:bg-black mb-4">
+                  <span className="text-sm font-medium">Simple Pricing</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose the plan that&apos;s right for you</h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                  All plans include core features. Upgrade anytime as your business grows.
+                </p>
+              </div>
 
-          {/* Feature Comparison Table Section */}
-          <section id="feature-comparison" className="py-12 md:py-24 bg-white dark:bg-gray-800">
-            <div className="container mx-auto px-4 md:px-6">
-              <h2 className="text-3xl font-bold text-center mb-8">Compare Our Plans</h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white dark:bg-gray-800">
-                  <thead>
-                    <tr>
-                      <th className="py-2 px-4 border-b text-left">Feature</th>
-                      <th className="py-2 px-4 border-b text-left">Basic</th>
-                      <th className="py-2 px-4 border-b text-left">Pro</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="py-2 px-4 border-b text-left">Job Costing</td>
-                      <td className="py-2 px-4 border-b text-left">Basic</td>
-                      <td className="py-2 px-4 border-b text-left">Advanced</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-4 border-b text-left">Projects</td>
-                      <td className="py-2 px-4 border-b text-left">Up to 10</td>
-                      <td className="py-2 px-4 border-b text-left">Unlimited</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-4 border-b text-left">Support</td>
-                      <td className="py-2 px-4 border-b text-left">Email</td>
-                      <td className="py-2 px-4 border-b text-left">Priority</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-4 border-b text-left">Profit Analysis</td>
-                      <td className="py-2 px-4 border-b text-left">No</td>
-                      <td className="py-2 px-4 border-b text-left">Yes</td>
-                    </tr>
-                  </tbody>
-                </table>
+              {/* Pricing Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                {/* Starter Plan */}
+                <Card className="relative group overflow-hidden border-2 border-neutral-200 dark:border-neutral-800">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  <CardHeader>
+                    <CardTitle>Starter</CardTitle>
+                    <div className="flex items-baseline mt-2">
+                      <span className="text-3xl font-bold">£9</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-1">/month</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <ul className="space-y-2">
+                      {[
+                        'Up to 10 jobs per month',
+                        'Basic job calculator',
+                        'PDF exports',
+                        'Email support'
+                      ].map((feature, i) => (
+                        <li key={i} className="flex items-center">
+                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button className="w-full bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
+                      Get Started
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Pro Plan */}
+                <Card className="relative group overflow-hidden border-2 border-primary transform scale-105">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute top-0 right-0">
+                    <Badge className="m-2 bg-primary text-white">Most Popular</Badge>
+                  </div>
+                  
+                  <CardHeader>
+                    <CardTitle>Pro</CardTitle>
+                    <div className="flex items-baseline mt-2">
+                      <span className="text-3xl font-bold">£29</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-1">/month</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <ul className="space-y-2">
+                      {[
+                        'Unlimited jobs',
+                        'Advanced job calculator',
+                        'Custom material library',
+                        'Priority support',
+                        'Revenue tracking',
+                        'Team collaboration'
+                      ].map((feature, i) => (
+                        <li key={i} className="flex items-center">
+                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button className="w-full bg-primary hover:bg-primary/90">
+                      Get Started
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Enterprise Plan */}
+                <Card className="relative group overflow-hidden border-2 border-neutral-200 dark:border-neutral-800">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  <CardHeader>
+                    <CardTitle>Enterprise</CardTitle>
+                    <div className="flex items-baseline mt-2">
+                      <span className="text-3xl font-bold">£99</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-1">/month</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <ul className="space-y-2">
+                      {[
+                        'Everything in Pro',
+                        'Custom integrations',
+                        'Dedicated account manager',
+                        'Custom reporting',
+                        'API access',
+                        'SSO & advanced security'
+                      ].map((feature, i) => (
+                        <li key={i} className="flex items-center">
+                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button className="w-full bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
+                      Contact Sales
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </section>
 
+          <SectionDivider />
+
+          {/* Testimonials Section */}
+          <section className="py-24 relative overflow-hidden">
+            <div className="container mx-auto px-4 md:px-6">
+              {/* Section Header */}
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm dark:border-neutral-800 dark:bg-black mb-4">
+                  <span className="text-sm font-medium">Testimonials</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Trusted by Trade Professionals</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[
+                  {
+                    quote: "TradeJob Pro has transformed how I price jobs. No more guesswork, just accurate quotes every time.",
+                    author: "Mike Johnson",
+                    role: "Construction Manager",
+                    company: "MJ Building Services"
+                  },
+                  {
+                    quote: "The calculator feature alone has saved me hours of work. Best investment for my business this year.",
+                    author: "Sarah Williams",
+                    role: "Interior Designer",
+                    company: "SW Interiors"
+                  },
+                  {
+                    quote: "Finally, software that understands what trades people actually need. Customer support is excellent too.",
+                    author: "David Chen",
+                    role: "Electrical Contractor",
+                    company: "Chen Electrics"
+                  }
+                ].map((testimonial, i) => (
+                  <Card key={i} className="relative group">
+                    <CardContent className="pt-6">
+                      <div className="absolute -top-4 left-6">
+                        <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary">
+                          <Quote className="h-4 w-4 text-white" />
+                        </div>
+                      </div>
+                      <blockquote className="mb-6 text-gray-600 dark:text-gray-400">
+                        &quot;{testimonial.quote}&quot;
+                      </blockquote>
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <p className="font-semibold">{testimonial.author}</p>
+                          <p className="text-sm text-gray-500">{testimonial.role}</p>
+                          <p className="text-sm text-primary">{testimonial.company}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <SectionDivider />
+
           {/* FAQ Section */}
-          <section id="faq" className="py-12 md:py-24">
-            <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
-            <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>How does TradeJob Pro help me manage my projects?</AccordionTrigger>
-                <AccordionContent>
-                  TradeJob Pro offers a comprehensive project management solution. You can create and track multiple jobs, estimate costs accurately, monitor project timelines, and analyze profitability. Our dashboard gives you a clear overview of all your active projects, helping you stay organized and efficient.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>Can I customize material costs and labor rates?</AccordionTrigger>
-                <AccordionContent>
-                  Absolutely! TradeJob Pro allows you to input and customize your own material costs and labor rates. You can easily update these as prices change, ensuring your estimates and calculations are always based on the most current data. This flexibility makes our tool suitable for various trades and regions.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>How does the profit analysis feature work?</AccordionTrigger>
-                <AccordionContent>
-                  Our profit analysis tool provides detailed insights into your project finances. It compares estimated costs against actual expenses, calculates profit margins, and presents the data in easy-to-understand charts and reports. This feature helps you identify your most profitable jobs and areas where you can improve efficiency.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-4">
-                <AccordionTrigger>Is it easy to generate professional quotes for clients?</AccordionTrigger>
-                <AccordionContent>
-                  Yes, TradeJob Pro makes it simple to create professional quotes. Once you&apos;ve input your project details and costs, you can generate a detailed PDF report with a breakdown of materials, labor, and other expenses. This feature helps you present clear, professional estimates to your clients, potentially improving your chances of winning bids.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-5">
-                <AccordionTrigger>Can I access TradeJob Pro on my mobile device?</AccordionTrigger>
-                <AccordionContent>
-                  Yes, TradeJob Pro is designed to be responsive and work on various devices, including smartphones and tablets. This allows you to access your project information, update job statuses, and even create estimates while on the go, directly from the job site.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+          <section id="faq" className="py-24 relative overflow-hidden">
+            <div className="container mx-auto px-4 md:px-6">
+              {/* Section Header */}
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm dark:border-neutral-800 dark:bg-black mb-4">
+                  <span className="text-sm font-medium">FAQ</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                  Everything you need to know about TradeJob Pro.
+                </p>
+              </div>
+
+              {/* FAQ Accordion */}
+              <div className="max-w-3xl mx-auto">
+                <Accordion type="single" collapsible className="space-y-4">
+                  {[
+                    {
+                      question: "How does the job calculator work?",
+                      answer: "Our job calculator allows you to input materials, quantities, and labor costs. It automatically calculates total costs and generates detailed breakdowns. You can save frequently used materials and export calculations as professional PDF reports."
+                    },
+                    {
+                      question: "Can I track multiple jobs simultaneously?",
+                      answer: "Yes! You can manage multiple jobs at once, tracking their progress, costs, and status. The Pro and Enterprise plans offer unlimited jobs with advanced tracking features."
+                    },
+                    {
+                      question: "Is there a free trial available?",
+                      answer: "Yes, we offer a 14-day free trial of our Pro plan. No credit card required. You&apos;ll have access to all Pro features during the trial period."
+                    },
+                    {
+                      question: "Can I export my calculations and reports?",
+                      answer: "Yes, all plans include PDF export functionality. You can generate professional reports for your clients, including detailed cost breakdowns and material lists."
+                    },
+                    {
+                      question: "How do I get started?",
+                      answer: "Simply sign up for an account, choose your plan, and you can start using the calculator immediately. We provide onboarding guidance and tutorial videos to help you get started."
+                    }
+                  ].map((item, i) => (
+                    <AccordionItem key={i} value={`item-${i}`} className="border border-neutral-200 dark:border-neutral-800 rounded-lg">
+                      <AccordionTrigger className="px-4 hover:no-underline">
+                        {item.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4 text-gray-600 dark:text-gray-400">
+                        {item.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+
+              {/* Call to Action */}
+              <div className="mt-16 text-center">
+                <h3 className="text-2xl font-bold mb-4">Still have questions?</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">
+                  We&apos;re here to help. Contact our support team anytime.
+                </p>
+                <Button className="bg-primary hover:bg-primary/90">
+                  Contact Support
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          <SectionDivider />
+
+          {/* Quick Start Guide Section */}
+          <section className="py-24 relative overflow-hidden">
+            {/* Background effects */}
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900" />
+            <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
+            
+            <div className="container mx-auto px-4 md:px-6 relative z-10">
+              {/* Section Header */}
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm dark:border-neutral-800 dark:bg-black mb-4">
+                  <span className="text-sm font-medium">Quick Start Guide</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Get Started in Minutes</h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                  Follow these simple steps to start managing your jobs more efficiently
+                </p>
+              </div>
+
+              {/* Steps Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                {[
+                  {
+                    step: 1,
+                    title: "Create Your Account",
+                    description: "Sign up in seconds with your email or Google account. No credit card required for trial.",
+                    icon: <UserPlus className="h-6 w-6" />,
+                    action: "Sign Up Free",
+                    hint: "2-minute setup"
+                  },
+                  {
+                    step: 2,
+                    title: "Set Up Your Materials",
+                    description: "Add your commonly used materials and their costs to your personal library.",
+                    icon: <Package className="h-6 w-6" />,
+                    action: "Watch Demo",
+                    hint: "Pre-loaded templates"
+                  },
+                  {
+                    step: 3,
+                    title: "Create Your First Job",
+                    description: "Use the calculator to create accurate quotes and manage your first project.",
+                    icon: <Calculator className="h-6 w-6" />,
+                    action: "Try Calculator",
+                    hint: "Guided walkthrough"
+                  }
+                ].map((item, i) => (
+                  <div key={i} className="relative group">
+                    {/* Connector Lines (only between items) */}
+                    {i < 2 && (
+                      <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gray-200 dark:bg-gray-800">
+                        <div className="absolute top-1/2 right-0 w-2 h-2 -translate-y-1/2 bg-primary rounded-full animate-pulse" />
+                      </div>
+                    )}
+
+                    <Card className="relative overflow-hidden border-2 hover:border-primary transition-colors duration-300">
+                      <CardContent className="pt-6">
+                        {/* Step Number Bubble */}
+                        <div className="absolute -top-4 left-6">
+                          <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white font-bold">
+                            {item.step}
+                          </div>
+                        </div>
+
+                        <div className="mt-4 space-y-4">
+                          {/* Icon and Title */}
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 rounded-lg bg-primary/10">
+                              {item.icon}
+                            </div>
+                            <h3 className="font-semibold text-xl">{item.title}</h3>
+                          </div>
+
+                          {/* Description */}
+                          <p className="text-gray-600 dark:text-gray-400">
+                            {item.description}
+                          </p>
+
+                          {/* Action and Hint */}
+                          <div className="flex items-center justify-between pt-4">
+                            <Button className="bg-primary hover:bg-primary/90">
+                              {item.action}
+                            </Button>
+                            <Badge variant="secondary" className="bg-primary/10">
+                              {item.hint}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+
+              {/* Bottom CTA */}
+              <div className="mt-16 text-center">
+                <Card className="max-w-2xl mx-auto border-2 border-primary/20 bg-primary/5">
+                  <CardContent className="py-8">
+                    <h3 className="text-2xl font-bold mb-4">Ready to streamline your trade business?</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      Join thousands of professionals already using TradeJob Pro
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <Button className="bg-primary hover:bg-primary/90">
+                        Start Free Trial
+                      </Button>
+                      <Button variant="outline">
+                        Schedule Demo
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </section>
         </div>
       </main>

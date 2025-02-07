@@ -1,18 +1,18 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { withAuth } from "@kinde-oss/kinde-auth-nextjs/middleware";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
-  // If the request is for the root path
-  if (request.nextUrl.pathname === '/') {
-    // Redirect to the landing page
-    return NextResponse.redirect(new URL('/landing-page', request.url));
-  }
+export default withAuth(
+    function middleware(req: NextRequest) {
+        return NextResponse.next();
+    },
+    {
+        callbacks: {
+            authorized: ({ token }: { token: any }) => token !== null,
+        },
+    }
+);
 
-  // For all other requests, continue as normal
-  return NextResponse.next();
-}
-
-// Optionally, you can specify which routes this middleware applies to
 export const config = {
-  matcher: '/',
+    matcher: ["/dashboard/:path*", "/profile"]
 };

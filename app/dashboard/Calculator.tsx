@@ -1,10 +1,12 @@
+"use client"
+
 import React, { useState, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { PlusCircle, MinusCircle, Trash2, Save, FileDown, ChevronDown } from 'lucide-react'
+import { PlusCircle, MinusCircle, Trash2, Save, FileDown, ChevronDown, Package, Calculator as CalcIcon } from 'lucide-react'
 import { useToast } from "@/components/ui/use-toast"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { jsPDF } from 'jspdf'
@@ -136,10 +138,17 @@ export function Calculator() {
     doc.setFontSize(12)
     doc.setTextColor(0, 0, 0) // Black color
 
-    // Add total cost
-    doc.text(`Total Cost: £${job.totalPrice.toFixed(2)}`, 20, 30)
+    // Add total cost with type checking
+    const totalCost = typeof job.totalPrice === 'number' ? job.totalPrice.toFixed(2) : '0.00'
+    doc.text(`Total Cost: £${totalCost}`, 20, 30)
     
-    const tableData = job.materials.map(m => [m.name, m.quantity, m.unit, `£${m.cost.toFixed(2)}`, `£${(m.quantity * m.cost).toFixed(2)}`])
+    const tableData = job.materials.map(m => [
+      m.name,
+      m.quantity.toString(),
+      m.unit,
+      `£${m.cost.toFixed(2)}`,
+      `£${(m.quantity * m.cost).toFixed(2)}`
+    ])
     
     // @ts-expect-error: jsPDF types are not fully compatible with the autoTable plugin
     doc.autoTable({
@@ -147,10 +156,11 @@ export function Calculator() {
       body: tableData,
       startY: 40,
       styles: { fontSize: 10, cellPadding: 2 },
-      headStyles: { fillColor: [0, 102, 204], textColor: 255 }, // Blue background, white text
-      alternateRowStyles: { fillColor: [240, 240, 240] }, // Light gray for alternate rows
+      headStyles: { fillColor: [0, 102, 204], textColor: 255 },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
       margin: { top: 40 },
     })
+
     // Add footer
     const pageCount = doc.internal.pages.length
     for (let i = 1; i <= pageCount; i++) {
@@ -175,141 +185,232 @@ export function Calculator() {
     }
   };
 
+  const handleGeneratePDF = () => {
+    // Create a job object from current state
+    const currentJob = {
+      id: Math.random().toString(36).substr(2, 9), // Generate a temporary ID
+      name: jobName || 'Untitled Job',
+      materials: materials,
+      totalPrice: totalPrice,
+      status: 'pending' as const
+    };
+
+    generatePDF(currentJob);
+  };
+
   return (
-    <Card className="bg-white dark:bg-gray-700 shadow-md rounded-lg border border-gray-200 dark:border-gray-600">
-      <CardHeader>
-        <CardTitle>Job Calculator</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="material-name">Material</Label>
-              <Input
-                id="material-name"
-                value={newMaterial.name}
-                onChange={(e) => setNewMaterial({...newMaterial, name: e.target.value})}
-                placeholder="e.g., Brick, Cement"
-                className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
-              />
-            </div>
-            <div>
-              <Label htmlFor="material-cost">Cost</Label>
-              <Input
-                id="material-cost"
-                type="text"
-                value={newMaterial.cost || ''}
-                onChange={handleCostChange}
-                placeholder="Cost per unit"
-                className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
-              />
-            </div>
-            <div>
-              <Label htmlFor="material-unit">Unit</Label>
-              <Input
-                id="material-unit"
-                value={newMaterial.unit}
-                onChange={(e) => setNewMaterial({...newMaterial, unit: e.target.value})}
-                placeholder="e.g., bag, sqm, hour"
-                className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
-              />
-            </div>
-          </div>
-          <Button onClick={addMaterial} className="bg-blue-500 hover:bg-blue-600 text-white">Add New Material</Button>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Job Calculator</h2>
+          <p className="text-muted-foreground">Create and manage job estimates with ease.</p>
         </div>
+        <Button 
+          onClick={handleGeneratePDF} 
+          className="flex items-center gap-2"
+          disabled={materials.length === 0}
+        >
+          <FileDown className="h-4 w-4" /> Export PDF
+        </Button>
+      </div>
 
-        <Table className="mt-6">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Material</TableHead>
-              <TableHead>Cost per Unit</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {materials.map((material) => (
-              <TableRow key={material.id}>
-                <TableCell>{material.name}</TableCell>
-                <TableCell>£{material.cost.toFixed(2)} per {material.unit}</TableCell>
-                <TableCell>{material.quantity}</TableCell>
-                <TableCell>£{(material.cost * material.quantity).toFixed(2)}</TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      onClick={() => updateQuantity(material.id, -1)}
-                      className="hover:bg-red-100 dark:hover:bg-red-900 transition-colors duration-200"
-                    >
-                      <MinusCircle className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      onClick={() => updateQuantity(material.id, 1)}
-                      className="hover:bg-green-100 dark:hover:bg-green-900 transition-colors duration-200"
-                    >
-                      <PlusCircle className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      className="bg-red-500 text-white hover:bg-red-600 transition-colors duration-200" 
-                      size="icon" 
-                      onClick={() => deleteMaterial(material.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Materials Input Card */}
+        <Card className="md:row-span-2">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Package className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Materials</CardTitle>
+                <CardDescription>Add materials and their costs</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Add Material Form */}
+              <div className="grid gap-4 p-4 border rounded-lg bg-muted/50">
+                <div className="grid gap-2">
+                  <Label htmlFor="material-name">Material Name</Label>
+                  <Input
+                    id="material-name"
+                    value={newMaterial.name}
+                    onChange={(e) => setNewMaterial({...newMaterial, name: e.target.value})}
+                    placeholder="e.g., Brick, Cement"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="material-cost">Cost</Label>
+                    <Input
+                      id="material-cost"
+                      type="text"
+                      value={newMaterial.cost || ''}
+                      onChange={handleCostChange}
+                      placeholder="0.00"
+                    />
                   </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  <div className="grid gap-2">
+                    <Label htmlFor="material-unit">Unit</Label>
+                    <Input
+                      id="material-unit"
+                      value={newMaterial.unit}
+                      onChange={(e) => setNewMaterial({...newMaterial, unit: e.target.value})}
+                      placeholder="e.g., bag, sqm"
+                    />
+                  </div>
+                </div>
+                <Button onClick={addMaterial} className="w-full">
+                  <PlusCircle className="h-4 w-4 mr-2" /> Add Material
+                </Button>
+              </div>
 
-        <div className="mt-6 space-y-4">
-          <Collapsible>
-            <CollapsibleTrigger className="flex items-center">
-              <div className="text-2xl font-bold">Total Price: £{totalPrice.toFixed(2)}</div>
-              <ChevronDown className="h-4 w-4 ml-2" />
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Material</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Cost</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {materials.filter(m => m.quantity > 0).map((material) => (
-                    <TableRow key={material.id}>
-                      <TableCell>{material.name}</TableCell>
-                      <TableCell>{material.quantity} {material.unit}</TableCell>
-                      <TableCell>£{(material.cost * material.quantity).toFixed(2)}</TableCell>
+              {/* Materials List */}
+              <div className="rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Material</TableHead>
+                      <TableHead>Cost/Unit</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead className="w-[100px]">Actions</TableHead>
                     </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {materials.map((material) => (
+                      <TableRow key={material.id}>
+                        <TableCell className="font-medium">{material.name}</TableCell>
+                        <TableCell>£{material.cost.toFixed(2)}/{material.unit}</TableCell>
+                        <TableCell>{material.quantity}</TableCell>
+                        <TableCell>£{(material.cost * material.quantity).toFixed(2)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => updateQuantity(material.id, -1)}
+                              className="hover:text-red-500"
+                            >
+                              <MinusCircle className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => updateQuantity(material.id, 1)}
+                              className="hover:text-green-500"
+                            >
+                              <PlusCircle className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => deleteMaterial(material.id)}
+                              className="hover:text-red-500"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {materials.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground">
+                          No materials added. Add your first material above.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Summary Card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <CalcIcon className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Job Summary</CardTitle>
+                <CardDescription>Overview and total costs</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Collapsible>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Cost</p>
+                  <p className="text-3xl font-bold">£{totalPrice.toFixed(2)}</p>
+                </div>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
+
+              <CollapsibleContent>
+                <div className="space-y-4">
+                  {materials.filter(m => m.quantity > 0).map((material) => (
+                    <div key={material.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{material.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {material.quantity} {material.unit} × £{material.cost.toFixed(2)}
+                        </p>
+                      </div>
+                      <p className="font-medium">£{(material.cost * material.quantity).toFixed(2)}</p>
+                    </div>
                   ))}
-                </TableBody>
-              </Table>
-              <Button onClick={() => generatePDF({ id: 'temp', name: jobName || 'Unnamed Job', materials, totalPrice, status: 'pending' })} className="mt-2">
-                <FileDown className="mr-2 h-4 w-4" /> Save as PDF
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </CardContent>
+        </Card>
+
+        {/* Save Job Card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Save className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Save Job</CardTitle>
+                <CardDescription>Save this estimate as a job</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="job-name">Job Name</Label>
+                <Input
+                  id="job-name"
+                  value={jobName}
+                  onChange={(e) => setJobName(e.target.value)}
+                  placeholder="Enter job name"
+                />
+              </div>
+              <Button 
+                onClick={saveJob} 
+                disabled={!jobName || totalPrice === 0}
+                className="w-full"
+              >
+                <Save className="mr-2 h-4 w-4" /> Save Job
               </Button>
-            </CollapsibleContent>
-          </Collapsible>
-          <div className="flex space-x-4">
-            <Input
-              value={jobName}
-              onChange={(e) => setJobName(e.target.value)}
-              placeholder="Enter job name"
-              className="flex-grow"
-            />
-            <Button onClick={saveJob} disabled={!jobName || totalPrice === 0}>
-              <Save className="mr-2 h-4 w-4" /> Save Job
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   )
 }

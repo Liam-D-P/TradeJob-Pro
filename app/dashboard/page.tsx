@@ -1,15 +1,28 @@
 "use client";
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
 import Dashboard from '@/app/dashboard/dashboard';
 
 export default function DashboardPage() {
-    console.log('DashboardPage component rendering started');
+    const router = useRouter();
+    const { isAuthenticated, isLoading } = useKindeAuth();
 
     useEffect(() => {
-        console.log('Dashboard page mounted');
-    }, []);
+        if (!isLoading && !isAuthenticated) {
+            console.log('User not authenticated, redirecting to login');
+            router.push('/login');
+        }
+    }, [isAuthenticated, isLoading, router]);
 
-    console.log('About to render Dashboard component');
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (!isAuthenticated) {
+        return null;
+    }
+
     return <Dashboard />;
 }
