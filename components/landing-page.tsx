@@ -152,18 +152,17 @@ export default function LandingPage() {
               <div className="absolute w-2 h-2 bg-primary/20 rounded-full animate-float" style={{ bottom: '20%', left: '30%' }} />
             </div>
 
-            <div className="relative z-10 max-w-5xl mx-auto space-y-8">
+            <div className="relative z-10 max-w-7xl mx-auto space-y-8">
               <div className="space-y-6 text-center">
                 <div className="space-y-4 relative">
-                  <div className="inline-block animate-fade-in [--animation-delay:200ms]">
-                    <div className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm dark:border-neutral-800 dark:bg-black">
-                      <span className="block w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
-                      <span className="text-sm font-medium">New Features Available</span>
-                    </div>
+                  <div className="relative">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-black dark:text-white mx-auto max-w-[1100px] leading-tight dark:[text-shadow:0_1px_2px_rgba(255,255,255,0.1),0_2px_4px_rgba(255,255,255,0.05)]">
+                      Transform Your Trade Business with Professional-Grade Job Costing
+                    </h1>
                   </div>
 
                   <WordFadeIn
-                    words="Stop guessing. Start pricing with confidence. Our advanced calculator helps trade professionals boost accuracy and profitability on every project."
+                    words="Join thousands of trade professionals who've eliminated pricing guesswork. Our intelligent platform helps you calculate costs, track projects, and maximize profits on every job - all in one place."
                     className="mx-auto max-w-[700px] text-gray-600 dark:text-gray-400 text-xl md:text-2xl leading-relaxed"
                   />
 
